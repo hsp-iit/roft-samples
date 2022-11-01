@@ -84,7 +84,7 @@ RUN source /robotology-superbuild/build/install/share/robotology-superbuild/setu
 # Build ROFT
 RUN source /robotology-superbuild/build/install/share/robotology-superbuild/setup.sh && \
     git clone https://github.com/hsp-iit/roft && \
-    cd roft && mkdir build && cd build && \
+    cd roft && git checkout impl/online && mkdir build && cd build && \
     cmake .. && \
     make -j$NJOBS install && \
     rm -rf /roft
@@ -108,8 +108,22 @@ RUN echo "(setq-default indent-tabs-mode nil)" >> /home/user/.emacs.el && \
     echo "(custom-set-variables '(custom-enabled-themes '(tango-dark)))" >> /home/user/.emacs.el && \
     echo "(custom-set-faces)" >> /home/user/.emacs.elx
 
-# Configure robotology-superbuild
+
+# Build roft-samples
+WORKDIR /home/user
+RUN source /robotology-superbuild/build/install/share/robotology-superbuild/setup.sh && \
+    git clone https://github.com/xenvre/roft-samples && \
+    cd roft-samples && mkdir build && cd build && \
+    cmake -DBUILD_TRACKER:BOOL=ON -DCMAKE_INSTALL_PREFIX=/home/user/roft-samples/install .. && \
+    make -j$NJOBS install && \
+    rm -rf /roft
+
+# Configure robotology-superbuild and roft-samples
 RUN echo "source /robotology-superbuild/build/install/share/robotology-superbuild/setup.sh" >> /home/user/.bashrc
+RUN echo "export YARP_DATA_DIRS=${YARP_DATA_DIRS}:/home/user/roft-samples/install/share/ICUBcontrib" >> /home/user/.bashrc
+RUN echo "export PATH=${PATH}:/home/user/roft-samples/install/bin" >> /home/user/.bashrc
+RUN mkdir /home/user/roft-samples/install/share/ICUBcontrib/applications && \
+    cp /home/user/roft-samples/install/share/ICUBcontrib/templates/applications/roft.xml  /home/user/roft-samples/install/share/ICUBcontrib/applications/roft.xml
 
 # Launch bash from /home/user
 WORKDIR /home/user
