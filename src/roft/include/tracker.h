@@ -53,7 +53,7 @@ private:
 
     ROFT::ModelParameters model_parameters_;
 
-    const std::string log_name_ = "roft-tracker";
+    const std::string log_name_ = "roft-samples-tracker";
 };
 
 #endif /* TRACKER_H */

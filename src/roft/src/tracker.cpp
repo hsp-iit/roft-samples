@@ -461,25 +461,25 @@ std::string Tracker::stop()
 VectorXd Tracker::load_vector_double(const Bottle& resource, const std::string& key, const std::size_t size)
 {
     if (resource.find(key).isNull())
-        throw(std::runtime_error("robmo-misc-object-tracker-of::load_vector_double. Cannot find key " + key + "."));
+        throw(std::runtime_error("roft-samples-tracker::load_vector_double. Cannot find key " + key + "."));
 
     Bottle* b = resource.find(key).asList();
     if (b == nullptr)
-        throw(std::runtime_error("robmo-misc-object-tracker-of::load_vector_double. Cannot get vector having key " + key + " as a list."));
+        throw(std::runtime_error("roft-samples-tracker::load_vector_double. Cannot get vector having key " + key + " as a list."));
 
 
     if (b->size() != size)
-        throw(std::runtime_error("robmo-misc-object-tracker-of::load_vector_double. Vector having key " + key + " has size "  + std::to_string(b->size()) + " (expected is " + std::to_string(size) + ")."));
+        throw(std::runtime_error("roft-samples-tracker::load_vector_double. Vector having key " + key + " has size "  + std::to_string(b->size()) + " (expected is " + std::to_string(size) + ")."));
 
     VectorXd vector(size);
     for (std::size_t i = 0; i < b->size(); i++)
     {
         Value item_v = b->get(i);
         if (item_v.isNull())
-            throw(std::runtime_error("robmo-misc-object-tracker-of::load_vector_double." + std::to_string(i) + "-th element of of vector having key " + key + " is null."));
+            throw(std::runtime_error("roft-samples-tracker::load_vector_double." + std::to_string(i) + "-th element of of vector having key " + key + " is null."));
 
         if (!item_v.isFloat64())
-            throw(std::runtime_error("robmo-misc-object-tracker-of::load_vector_double." + std::to_string(i) + "-th element of of vector having key " + key + " is not a double."));
+            throw(std::runtime_error("roft-samples-tracker::load_vector_double." + std::to_string(i) + "-th element of of vector having key " + key + " is not a double."));
 
         vector(i) = item_v.asFloat64();
     }
