@@ -1,0 +1,117 @@
+<application>
+    <name>ROFT</name>
+
+    <module>
+        <name>roft-tracker</name>
+        <node>localhost</node>
+        <parameters>--OUTPUT_FORMAT::reference_frame root</parameters>
+    </module>
+
+    <module>
+        <name>roft-realsense</name>
+        <node>node_with_roft_realsense</node>
+    </module>
+
+    <module>
+        <name>yarpview</name>
+        <parameters>--name /roft-tracker/viewer/segmentation:i --compact --w 576 --h 432 --x 100 --y 100 </parameters>
+        <node>localhost</node>
+    </module>
+
+    <module>
+        <name>yarpview</name>
+        <parameters>--name /roft-tracker/viewer/refined_segmentation:i --synch --compact --w 576 --h 432 --x 712 --y 100</parameters>
+        <node>localhost</node>
+    </module>
+
+    <module>
+        <name>yarpview</name>
+        <parameters>--name /roft-tracker/viewer/pose_estimation:i --compact --w 576 --h 432 --x 100 --y 584</parameters>
+        <node>localhost</node>
+    </module>
+
+    <!-- <module> -->
+    <!--     <name>yarpview</name> -->
+    <!--     <parameters>-\-name /roft-tracker/viewer/outlier_rejection:i</parameters> -->
+    <!--     <node>localhost</node> -->
+    <!-- </module> -->
+
+    <module>
+        <name>yarpview</name>
+        <parameters>--name /roft-tracker/viewer/pose_render:i --synch --compact --w 576 --h 432 --x 712 --y 584</parameters>
+        <node>localhost</node>
+    </module>
+
+    <connection>
+        <from>/roft-tracker/segmentation/rgb:o</from>
+        <to>/detectron2/rgb:i</to>
+        <protocol>mjpeg</protocol>
+    </connection>
+
+    <connection>
+        <from>/depthCamera/depthImage:o</from>
+        <to>/roft-tracker/camera/depth:i</to>
+        <protocol>fast_tcp</protocol>
+    </connection>
+
+    <connection>
+        <from>/depthCamera/rgbImage:o</from>
+        <to>/roft-tracker/camera/rgb:i</to>
+        <protocol>fast_tcp</protocol>
+    </connection>
+
+    <connection>
+        <from>/realsense-holder-publisher/pose:o</from>
+        <to>/roft-tracker/camera/pose:i</to>
+        <protocol>fast_tcp</protocol>
+    </connection>
+
+    <connection>
+        <from>/detectron2/mask:o</from>
+        <to>/roft-tracker/segmentation/segmentation:i</to>
+        <protocol>fast_tcp</protocol>
+    </connection>
+
+    <connection>
+        <from>/roft-tracker/probe/segmentation:o</from>
+        <to>/roft-tracker/viewer/refined_segmentation:i</to>
+        <protocol>unix_stream</protocol>
+    </connection>
+
+    <connection>
+        <from>/roft-tracker/probe/segmentation_source:o</from>
+        <to>/roft-tracker/viewer/segmentation:i</to>
+        <protocol>unix_stream</protocol>
+    </connection>
+
+    <connection>
+        <from>/roft-tracker/probe/pose_source_render:o</from>
+        <to>/roft-tracker/viewer/pose_estimation:i</to>
+        <protocol>unix_stream</protocol>
+    </connection>
+
+    <connection>
+        <from>/roft-tracker/probe/outlier_rejection:o</from>
+        <to>/roft-tracker/viewer/outlier_rejection:i</to>
+        <protocol>unix_stream</protocol>
+    </connection>
+
+    <connection>
+        <from>/roft-tracker/probe/pose_render:o</from>
+        <to>/roft-tracker/viewer/pose_render:i</to>
+        <protocol>unix_stream</protocol>
+    </connection>
+
+    <connection>
+        <from>/dope/pose:o</from>
+        <to>/roft-tracker/pose/transform:i</to>
+        <protocol>fast_tcp</protocol>
+    </connection>
+
+    <connection>
+        <from>/roft-tracker/pose/rgb:o</from>
+        <to>/dope/rgb:i</to>
+        <protocol>fast_tcp</protocol>
+    </connection>
+
+</application>
