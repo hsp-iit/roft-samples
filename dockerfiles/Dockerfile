@@ -20,7 +20,7 @@ ENV LANG=en_US.UTF-8
 
 # Install essentials
 RUN apt update && \
-    apt install --no-install-recommends -y -qq apt-utils build-essential ca-certificates cmake cmake-curses-gui curl emacs-nox git glmark2 gnupg2 htop iputils-ping jq lsb-release mesa-utils nano psmisc python3-virtualenv sudo unzip vim wget zip && \
+    apt install --no-install-recommends -y -qq apt-utils build-essential ca-certificates cmake cmake-curses-gui curl emacs-nox git glmark2 gnupg2 htop iputils-ping jq libssl-dev libusb-1.0-0-dev lsb-release mesa-utils nano psmisc python3-virtualenv sudo unzip vim wget zip && \
     rm -rf /var/lib/apt/lists/*
 
 # Install GitHub cli
@@ -37,6 +37,14 @@ RUN apt update && \
     git clone https://github.com/robotology/robotology-superbuild && cd robotology-superbuild && bash scripts/install_apt_dependencies.sh && \
     apt remove -y libopencv* && \
     rm -rf /var/lib/apt/lists/*
+
+# Build librealsense w/ CUDA
+RUN git clone https://github.com/IntelRealSense/librealsense && \
+    cd /librealsense && git checkout v2.52.1 && \
+    mkdir build && cd build && \
+    cmake -DBUILD_WITH_CUDA:BOOL=TRUE -DFORCE_RSUSB_BACKEND:BOOL=TRUE ../ && \
+    make -j$NJOBS install && \
+    rm -rf /librealsense
 
 # Build OpenCV
 RUN git clone https://github.com/opencv/opencv && \
@@ -108,15 +116,13 @@ RUN echo "(setq-default indent-tabs-mode nil)" >> /home/user/.emacs.el && \
     echo "(custom-set-variables '(custom-enabled-themes '(tango-dark)))" >> /home/user/.emacs.el && \
     echo "(custom-set-faces)" >> /home/user/.emacs.elx
 
-
 # Build roft-samples
 WORKDIR /home/user
 RUN source /robotology-superbuild/build/install/share/robotology-superbuild/setup.sh && \
     git clone https://github.com/xenvre/roft-samples && \
-    cd roft-samples && mkdir build && cd build && \
-    cmake -DBUILD_TRACKER:BOOL=ON -DCMAKE_INSTALL_PREFIX=/home/user/roft-samples/install .. && \
-    make -j$NJOBS install && \
-    rm -rf /roft
+    cd /home/user/roft-samples && mkdir build && cd build && \
+    cmake -DBUILD_TRACKER:BOOL=ON -DBUILD_REALSENSE:BOOL=ON -DCMAKE_INSTALL_PREFIX=/home/user/roft-samples/install .. && \
+    make -j$NJOBS install
 
 # Configure robotology-superbuild and roft-samples
 RUN echo "source /robotology-superbuild/build/install/share/robotology-superbuild/setup.sh" >> /home/user/.bashrc
