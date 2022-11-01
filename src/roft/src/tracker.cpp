@@ -33,7 +33,7 @@ using namespace yarp::os;
 using namespace yarp::sig;
 
 
-Tracker::Tracker(const ResourceFinder& rf)
+Tracker::Tracker(ResourceFinder& rf)
 {
     /* Sample time. */
 
@@ -102,7 +102,7 @@ Tracker::Tracker(const ResourceFinder& rf)
     const bool model_use_internal_db = rf_model.check("use_internal_db", Value(true)).asBool();
     const std::string model_internal_db_name = rf_model.check("internal_db_name", Value("YCBVideo")).asString();
     const std::string model_external_path = rf_model.check("external_path", Value("")).asString();
-    textured_model_external_path_root_ = rf_model.check("textured_mesh_path", Value("")).asString();
+    textured_model_external_path_root_ = rf.findPath("roft-samples-tracker") + "/meshes/DOPE_textured";
     const std::string textured_model_external_path = textured_model_external_path_root_ + "/" + model_name + "/textured.obj";
 
     /* Optical flow. */

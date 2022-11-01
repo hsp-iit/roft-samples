@@ -26,7 +26,7 @@
 class Tracker : public TrackerIDL
 {
 public:
-    Tracker(const yarp::os::ResourceFinder& resource_finder);
+    Tracker(yarp::os::ResourceFinder& resource_finder);
 
     /**
      * IDL interface.
