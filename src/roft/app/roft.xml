@@ -30,12 +30,6 @@
         <node>localhost</node>
     </module>
 
-    <!-- <module> -->
-    <!--     <name>yarpview</name> -->
-    <!--     <parameters>-\-name /roft-tracker/viewer/outlier_rejection:i</parameters> -->
-    <!--     <node>localhost</node> -->
-    <!-- </module> -->
-
     <module>
         <name>yarpview</name>
         <parameters>--name /roft-tracker/viewer/pose_render:i --synch --compact --w 576 --h 432 --x 712 --y 584</parameters>
