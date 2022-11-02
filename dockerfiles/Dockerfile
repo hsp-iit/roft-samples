@@ -151,8 +151,8 @@ RUN mkdir -p /home/user/.local/share/yarp/contexts
 RUN mkdir -p /home/user/.local/share/yarp/applications
 
 # Configure roft-samples
-RUN echo "export YARP_DATA_DIRS=${YARP_DATA_DIRS}:/home/user/roft-samples/install/share/ICUBcontrib" >> /home/user/.bashrc
-RUN echo "export PATH=${PATH}:/home/user/roft-samples/install/bin" >> /home/user/.bashrc
+RUN echo "export YARP_DATA_DIRS=\$YARP_DATA_DIRS:/home/user/roft-samples/install/share/ICUBcontrib" >> /home/user/.bashrc
+RUN echo "export PATH=\$PATH:/home/user/roft-samples/install/bin" >> /home/user/.bashrc
 RUN cp /home/user/roft-samples/install/share/ICUBcontrib/templates/applications/roft.xml /home/user/.local/share/yarp/applications/roft.xml
 RUN mkdir /home/user/.local/share/yarp/contexts/roft-samples-tracker && \
     cp /home/user/roft-samples/install/share/ICUBcontrib/contexts/roft-samples-tracker/config.ini /home/user/.local/share/yarp/contexts/roft-samples-tracker/config.ini
