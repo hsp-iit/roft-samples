@@ -11,6 +11,12 @@
         <node>localhost</node>
     </module>
 
+    <module>
+        <name>realsense-holder-publisher</name>
+        <node>localhost</node>
+        <parameters>--from config_half_tilted.ini</parameters>
+    </module>
+
     <connection>
         <from>/roft-samples-handover/segmentation/rpc:o</from>
         <to>/detectron2/rpc:i</to>
