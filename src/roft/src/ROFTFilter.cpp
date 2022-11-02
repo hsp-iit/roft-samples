@@ -11,7 +11,6 @@
 #include <BayesFilters/KFPrediction.h>
 #include <BayesFilters/LinearStateModel.h>
 #include <BayesFilters/UKFPrediction.h>
-#include <BayesFilters/UKFCorrection.h>
 
 #include <ROFT/CartesianQuaternionMeasurement.h>
 #include <ROFT/CartesianQuaternionModel.h>
@@ -19,6 +18,7 @@
 #include <ROFT/MeshResource.h>
 #include <ROFT/SpatialVelocityModel.h>
 #include <ROFT/SKFCorrection.h>
+#include <ROFT/UKFCorrection.h>
 
 #include <RobotsIO/Camera/CameraParameters.h>
 
@@ -166,9 +166,9 @@ ROFTFilter::ROFTFilter
     );
 
     /* Correction. */
-    p_correction_ = std::unique_ptr<UKFCorrection>
+    p_correction_ = std::unique_ptr<ROFT::UKFCorrection>
     (
-        new UKFCorrection(std::move(measurement_model), ut_alpha, ut_beta, ut_kappa, true)
+        new ROFT::UKFCorrection(std::move(measurement_model), ut_alpha, ut_beta, ut_kappa)
     );
 
     v_correction_ = std::unique_ptr<SKFCorrection>
