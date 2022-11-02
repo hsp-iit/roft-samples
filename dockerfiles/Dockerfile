@@ -140,12 +140,25 @@ RUN source /robotology-superbuild/build/install/share/robotology-superbuild/setu
     cmake -DBUILD_TRACKER:BOOL=ON -DBUILD_REALSENSE:BOOL=ON -DCMAKE_INSTALL_PREFIX=/home/user/roft-samples/install .. && \
     make -j$NJOBS install
 
-# Configure robotology-superbuild and roft-samples
+# Configure robotology-superbuild
 RUN echo "source /robotology-superbuild/build/install/share/robotology-superbuild/setup.sh" >> /home/user/.bashrc
+
+# Configure YARP context
+RUN mkdir -p /home/user/.local/share/yarp/contexts
+
+# Configure YARP applications
+RUN mkdir -p /home/user/.local/share/yarp/applications
+
+# Configure realsense-holder-publisher
+RUN mkdir -p /home/user/.local/share/yarp/contexts/realsense-holder-publisher && \
+    cp /usr/local/share/ICUBcontrib/contexts/realsense-holder-publisher/config.ini /home/user/.local/share/yarp/contexts/realsense-holder-publisher/config.ini
+
+# Configure roft-samples
 RUN echo "export YARP_DATA_DIRS=${YARP_DATA_DIRS}:/home/user/roft-samples/install/share/ICUBcontrib" >> /home/user/.bashrc
 RUN echo "export PATH=${PATH}:/home/user/roft-samples/install/bin" >> /home/user/.bashrc
-RUN mkdir /home/user/roft-samples/install/share/ICUBcontrib/applications && \
-    cp /home/user/roft-samples/install/share/ICUBcontrib/templates/applications/roft.xml  /home/user/roft-samples/install/share/ICUBcontrib/applications/roft.xml
+RUN cp /home/user/roft-samples/install/share/ICUBcontrib/templates/applications/roft.xml /home/user/.local/share/yarp/applications/roft.xml
+RUN mkdir /home/user/.local/share/yarp/contexts/roft-samples-tracker && \
+    cp /home/user/roft-samples/install/share/ICUBcontrib/contexts/roft-samples-tracker/config.ini /home/user/.local/share/yarp/contexts/roft-samples-tracker/config.ini
 
 # Launch bash from /home/user
 WORKDIR /home/user
