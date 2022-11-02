@@ -150,10 +150,6 @@ RUN mkdir -p /home/user/.local/share/yarp/contexts
 # Configure YARP applications
 RUN mkdir -p /home/user/.local/share/yarp/applications
 
-# Configure realsense-holder-publisher
-RUN mkdir -p /home/user/.local/share/yarp/contexts/realsense-holder-publisher && \
-    cp /usr/local/share/ICUBcontrib/contexts/realsense-holder-publisher/config.ini /home/user/.local/share/yarp/contexts/realsense-holder-publisher/config.ini
-
 # Configure roft-samples
 RUN echo "export YARP_DATA_DIRS=${YARP_DATA_DIRS}:/home/user/roft-samples/install/share/ICUBcontrib" >> /home/user/.bashrc
 RUN echo "export PATH=${PATH}:/home/user/roft-samples/install/bin" >> /home/user/.bashrc
@@ -165,6 +161,10 @@ RUN mkdir /home/user/.local/share/yarp/contexts/roft-samples-handover && \
     cp /home/user/roft-samples/install/share/ICUBcontrib/contexts/roft-samples-handover/config.ini /home/user/.local/share/yarp/contexts/roft-samples-handover/config.ini
 RUN mkdir /home/user/.local/share/yarp/contexts/roft-samples-grasp-viewer && \
     cp /home/user/roft-samples/install/share/ICUBcontrib/contexts/roft-samples-grasp-viewer/config.ini /home/user/.local/share/yarp/contexts/roft-samples-grasp-viewer/config.ini
+
+# Configure realsense-holder-publisher
+RUN mkdir -p /home/user/.local/share/yarp/contexts/realsense-holder-publisher && \
+    cp /home/user/roft-samples/assets/iCubGenova01/contexts/realsense-holder-publisher/* /home/user/.local/share/yarp/contexts/realsense-holder-publisher/
 
 # Launch bash from /home/user
 WORKDIR /home/user
