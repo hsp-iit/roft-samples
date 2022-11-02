@@ -13,6 +13,11 @@
     </module>
 
     <module>
+        <name>realsense-holder-calibration</name>
+        <node>localhost</node>
+    </module>
+
+    <module>
         <name>yarpview</name>
         <parameters>--name /roft-samples-tracker/viewer/segmentation:i --compact --w 576 --h 432 --x 100 --y 100 </parameters>
         <node>localhost</node>
