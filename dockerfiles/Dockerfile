@@ -144,26 +144,32 @@ RUN source /robotology-superbuild/build/install/share/robotology-superbuild/setu
 # Configure robotology-superbuild
 RUN echo "source /robotology-superbuild/build/install/share/robotology-superbuild/setup.sh" >> /home/user/.bashrc
 
-# Configure YARP context
-RUN mkdir -p /home/user/.local/share/yarp/contexts
-
-# Configure YARP applications
-RUN mkdir -p /home/user/.local/share/yarp/applications
-
-# Configure roft-samples
-RUN echo "export YARP_DATA_DIRS=\$YARP_DATA_DIRS:/home/user/roft-samples/install/share/ICUBcontrib" >> /home/user/.bashrc
-RUN echo "export PATH=\$PATH:/home/user/roft-samples/install/bin" >> /home/user/.bashrc
-RUN cp /home/user/roft-samples/install/share/ICUBcontrib/templates/applications/roft.xml /home/user/.local/share/yarp/applications/roft.xml
-RUN mkdir /home/user/.local/share/yarp/contexts/roft-samples-tracker && \
-    cp /home/user/roft-samples/install/share/ICUBcontrib/contexts/roft-samples-tracker/config.ini /home/user/.local/share/yarp/contexts/roft-samples-tracker/config.ini
-RUN cp /home/user/roft-samples/install/share/ICUBcontrib/templates/applications/roft-samples-handover.xml /home/user/.local/share/yarp/applications/roft-samples-handover.xml
-RUN mkdir /home/user/.local/share/yarp/contexts/roft-samples-handover && \
-    cp /home/user/roft-samples/install/share/ICUBcontrib/contexts/roft-samples-handover/config.ini /home/user/.local/share/yarp/contexts/roft-samples-handover/config.ini
-RUN mkdir /home/user/.local/share/yarp/contexts/roft-samples-grasp-viewer && \
-    cp /home/user/roft-samples/install/share/ICUBcontrib/contexts/roft-samples-grasp-viewer/config.ini /home/user/.local/share/yarp/contexts/roft-samples-grasp-viewer/config.ini
-
-# Configure realsense-holder-publisher
-RUN mkdir -p /home/user/.local/share/yarp/contexts/realsense-holder-publisher && \
+# Several configurations
+RUN mkdir -p /home/user/.local/share/yarp/contexts && \
+    mkdir -p /home/user/.local/share/yarp/applications && \
+    mkdir /home/user/.runtime && \
+#
+# exports
+    echo "export YARP_DATA_DIRS=\$YARP_DATA_DIRS:/home/user/roft-samples/install/share/ICUBcontrib" >> /home/user/.bashrc && \
+    echo "export PATH=\$PATH:/home/user/roft-samples/install/bin" >> /home/user/.bashrc && \
+    echo "export YARP_RUNTIME_DIR=/home/user/.runtime" >> /home/user/.bashrc && \
+#
+# roft-samples-tracker xml and config
+    cp /home/user/roft-samples/install/share/ICUBcontrib/templates/applications/roft.xml /home/user/.local/share/yarp/applications/roft.xml && \
+    mkdir /home/user/.local/share/yarp/contexts/roft-samples-tracker && \
+    cp /home/user/roft-samples/install/share/ICUBcontrib/contexts/roft-samples-tracker/config.ini /home/user/.local/share/yarp/contexts/roft-samples-tracker/config.ini && \
+#
+# roft-samples-handover xml and config
+    cp /home/user/roft-samples/install/share/ICUBcontrib/templates/applications/roft-samples-handover.xml /home/user/.local/share/yarp/applications/roft-samples-handover.xml && \
+    mkdir /home/user/.local/share/yarp/contexts/roft-samples-handover && \
+    cp /home/user/roft-samples/install/share/ICUBcontrib/contexts/roft-samples-handover/config.ini /home/user/.local/share/yarp/contexts/roft-samples-handover/config.ini && \
+#
+# roft-samples-grasp-viewer xml and config
+    mkdir /home/user/.local/share/yarp/contexts/roft-samples-grasp-viewer && \
+    cp /home/user/roft-samples/install/share/ICUBcontrib/contexts/roft-samples-grasp-viewer/config.ini /home/user/.local/share/yarp/contexts/roft-samples-grasp-viewer/config.ini && \
+#
+# realsense-holder-publisher
+    mkdir /home/user/.local/share/yarp/contexts/realsense-holder-publisher && \
     cp /home/user/roft-samples/assets/iCubGenova01/contexts/realsense-holder-publisher/* /home/user/.local/share/yarp/contexts/realsense-holder-publisher/
 
 # Launch bash from /home/user
