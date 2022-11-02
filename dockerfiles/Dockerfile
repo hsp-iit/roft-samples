@@ -137,7 +137,7 @@ WORKDIR /home/user
 RUN source /robotology-superbuild/build/install/share/robotology-superbuild/setup.sh && \
     git clone https://github.com/xenvre/roft-samples && \
     cd /home/user/roft-samples && mkdir build && cd build && \
-    cmake -DBUILD_TRACKER:BOOL=ON -DBUILD_REALSENSE:BOOL=ON -DCMAKE_INSTALL_PREFIX=/home/user/roft-samples/install .. && \
+    cmake -DBUILD_TRACKER:BOOL=ON -DBUILD_REALSENSE:BOOL=ON -DBUILD_HANDOVER:BOOL=ON -DCMAKE_INSTALL_PREFIX=/home/user/roft-samples/install .. && \
     make -j$NJOBS install
 
 # Configure robotology-superbuild
@@ -159,6 +159,9 @@ RUN echo "export PATH=${PATH}:/home/user/roft-samples/install/bin" >> /home/user
 RUN cp /home/user/roft-samples/install/share/ICUBcontrib/templates/applications/roft.xml /home/user/.local/share/yarp/applications/roft.xml
 RUN mkdir /home/user/.local/share/yarp/contexts/roft-samples-tracker && \
     cp /home/user/roft-samples/install/share/ICUBcontrib/contexts/roft-samples-tracker/config.ini /home/user/.local/share/yarp/contexts/roft-samples-tracker/config.ini
+RUN cp /home/user/roft-samples/install/share/ICUBcontrib/templates/applications/roft-samples-handover.xml /home/user/.local/share/yarp/applications/roft-samples-handover.xml
+RUN mkdir /home/user/.local/share/yarp/contexts/roft-samples-handover && \
+    cp /home/user/roft-samples/install/share/ICUBcontrib/contexts/roft-samples-handover/config.ini /home/user/.local/share/yarp/contexts/roft-samples-handover/config.ini
 
 # Launch bash from /home/user
 WORKDIR /home/user
