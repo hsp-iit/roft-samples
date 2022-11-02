@@ -39,5 +39,6 @@ endif()
 
 if (BUILD_HANDOVER)
   add_subdirectory(src/grasp-data)
+  add_subdirectory(src/grasp-viewer)
   add_subdirectory(src/handover)
 endif()
