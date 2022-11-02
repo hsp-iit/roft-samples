@@ -1,6 +1,6 @@
 # roft-samples
 
-A suite of applications based on ROFT
+A suite of applications based on [ROFT](https://github.com/hsp-iit/roft).
 
 ## Run the dockerized environment
 1. Build the docker image:
