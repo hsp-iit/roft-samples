@@ -1,1 +1,1 @@
-docker run -it --name roft-samples-cnt --user user --env="DISPLAY" --net=host -e NVIDIA_DRIVER_CAPABILITIES=all -v /tmp/.X11-unix:/tmp/.X11-unix --device /dev/dri/ --gpus all --runtime=nvidia roft-sample-img
+docker run -it --privileged --name roft-samples-cnt --user user --env="DISPLAY" --net=host -e NVIDIA_DRIVER_CAPABILITIES=all -v /tmp/.X11-unix:/tmp/.X11-unix --device /dev/dri/ --volume=/dev:/dev --gpus all --runtime=nvidia roft-sample-img
