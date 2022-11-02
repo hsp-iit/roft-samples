@@ -38,14 +38,6 @@ RUN apt update && \
     apt remove -y libopencv* && \
     rm -rf /var/lib/apt/lists/*
 
-# Build librealsense w/ CUDA
-RUN git clone https://github.com/IntelRealSense/librealsense && \
-    cd /librealsense && git checkout v2.52.1 && \
-    mkdir build && cd build && \
-    cmake -DBUILD_WITH_CUDA:BOOL=TRUE -DFORCE_RSUSB_BACKEND:BOOL=TRUE ../ && \
-    make -j$NJOBS install && \
-    rm -rf /librealsense
-
 # Build OpenCV
 RUN git clone https://github.com/opencv/opencv && \
     git clone https://github.com/opencv/opencv_contrib && \
@@ -56,6 +48,30 @@ RUN git clone https://github.com/opencv/opencv && \
     make -j$NJOBS install && \
     rm -rf /opencv && \
     rm -rf /opencv_contrib
+
+# Build librealsense w/ CUDA
+RUN git clone https://github.com/IntelRealSense/librealsense && \
+    cd /librealsense && git checkout v2.52.1 && \
+    mkdir build && cd build && \
+    cmake -DBUILD_WITH_CUDA:BOOL=TRUE -DFORCE_RSUSB_BACKEND:BOOL=TRUE ../ && \
+    make -j$NJOBS install && \
+    rm -rf /librealsense
+
+# Build ViSP
+RUN git clone https://github.com/lagadic/visp && \
+    cd /visp && git checkout v3.5.0 && \
+    mkdir build && cd build && \
+    cmake -DUSE_YARP:BOOL=OFF -DBUILD_DEMOS:BOOL=OFF -DBUILD_EXAMPLES:BOOL=OFF -DBUILD_TESTS:BOOL=OFF -DBUILD_TUTORIALS:BOOL=ON ../ && \
+    make -j$NJOBS install
+    # we need built tutorials for some scripts of realsense-holder-calibration, hence no removal here
+
+# Build realsense-holder-calibration
+RUN git clone https://github.com/robotology/realsense-holder-calibration && \
+    cd realsense-holder-calibration && \
+    mkdir build && cd build && \
+    cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../ && \
+    make -j$NJOBS install && \
+    rm -rf /realsense-holder-calibration
 
 # Build robotology-superbuild
 RUN git config --global user.name "user" && \
