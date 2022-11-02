@@ -34,13 +34,13 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | d
 # Install additional dependencies
 RUN apt update && \
     apt install --no-install-recommends -y -qq eog libassimp-dev libconfig++-dev libglfw3-dev libglew-dev libgtk2.0-dev libglm-dev libeigen3-dev libpython3-dev libtclap-dev libvtk7-dev && \
-    git clone https://github.com/robotology/robotology-superbuild && cd robotology-superbuild && bash scripts/install_apt_dependencies.sh && \
+    git clone --progress https://github.com/robotology/robotology-superbuild && cd robotology-superbuild && bash scripts/install_apt_dependencies.sh && \
     apt remove -y libopencv* && \
     rm -rf /var/lib/apt/lists/*
 
 # Build OpenCV
-RUN git clone https://github.com/opencv/opencv && \
-    git clone https://github.com/opencv/opencv_contrib && \
+RUN git clone --progress https://github.com/opencv/opencv && \
+    git clone --progress https://github.com/opencv/opencv_contrib && \
     cd /opencv_contrib && git checkout 4.5.2 && \
     cd /opencv && git checkout 4.5.2 && \
     mkdir build && cd build && \
@@ -50,7 +50,7 @@ RUN git clone https://github.com/opencv/opencv && \
     rm -rf /opencv_contrib
 
 # Build librealsense w/ CUDA
-RUN git clone https://github.com/IntelRealSense/librealsense && \
+RUN git clone --progress https://github.com/IntelRealSense/librealsense && \
     cd /librealsense && git checkout v2.52.1 && \
     mkdir build && cd build && \
     cmake -DBUILD_WITH_CUDA:BOOL=TRUE -DFORCE_RSUSB_BACKEND:BOOL=TRUE ../ && \
@@ -58,7 +58,7 @@ RUN git clone https://github.com/IntelRealSense/librealsense && \
     rm -rf /librealsense
 
 # Build ViSP
-RUN git clone https://github.com/lagadic/visp && \
+RUN git clone --progress https://github.com/lagadic/visp && \
     cd /visp && git checkout v3.5.0 && \
     mkdir build && cd build && \
     cmake -DUSE_YARP:BOOL=OFF -DBUILD_DEMOS:BOOL=OFF -DBUILD_EXAMPLES:BOOL=OFF -DBUILD_TESTS:BOOL=OFF -DBUILD_TUTORIALS:BOOL=ON ../ && \
@@ -76,7 +76,7 @@ RUN git config --global user.name "user" && \
 
 # Build realsense-holder-calibration
 RUN source /robotology-superbuild/build/install/share/robotology-superbuild/setup.sh && \
-    git clone https://github.com/robotology/realsense-holder-calibration && \
+    git clone --progress https://github.com/robotology/realsense-holder-calibration && \
     cd realsense-holder-calibration && \
     mkdir build && cd build && \
     cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../ && \
@@ -84,7 +84,7 @@ RUN source /robotology-superbuild/build/install/share/robotology-superbuild/setu
     rm -rf /realsense-holder-calibration
 
 # Build bayes-filters-lib
-RUN git clone https://github.com/robotology/bayes-filters-lib && \
+RUN git clone --progress https://github.com/robotology/bayes-filters-lib && \
     cd bayes-filters-lib && git checkout devel && mkdir build && cd build && \
     cmake .. && \
     make -j$NJOBS install && \
@@ -92,7 +92,7 @@ RUN git clone https://github.com/robotology/bayes-filters-lib && \
 
 # Build superimpose-mesh-lib
 RUN source /robotology-superbuild/build/install/share/robotology-superbuild/setup.sh && \
-    git clone https://github.com/robotology/superimpose-mesh-lib && \
+    git clone --progress https://github.com/robotology/superimpose-mesh-lib && \
     cd superimpose-mesh-lib && git checkout devel && mkdir build && cd build && \
     cmake .. && \
     make -j$NJOBS install && \
@@ -100,7 +100,7 @@ RUN source /robotology-superbuild/build/install/share/robotology-superbuild/setu
 
 # Build RobotsIO
 RUN source /robotology-superbuild/build/install/share/robotology-superbuild/setup.sh && \
-    git clone https://github.com/xenvre/robots-io && \
+    git clone --progress https://github.com/xenvre/robots-io && \
     cd robots-io && mkdir build && cd build && \
     cmake -DUSE_YARP:BOOL=ON .. && \
     make -j$NJOBS install && \
@@ -108,7 +108,7 @@ RUN source /robotology-superbuild/build/install/share/robotology-superbuild/setu
 
 # Build ROFT
 RUN source /robotology-superbuild/build/install/share/robotology-superbuild/setup.sh && \
-    git clone https://github.com/hsp-iit/roft && \
+    git clone --progress https://github.com/hsp-iit/roft && \
     cd roft && git checkout impl/online && mkdir build && cd build && \
     cmake .. && \
     make -j$NJOBS install && \
@@ -136,7 +136,7 @@ RUN echo "(setq-default indent-tabs-mode nil)" >> /home/user/.emacs.el && \
 # Build roft-samples
 WORKDIR /home/user
 RUN source /robotology-superbuild/build/install/share/robotology-superbuild/setup.sh && \
-    git clone https://github.com/xenvre/roft-samples && \
+    git clone --progress https://github.com/xenvre/roft-samples && \
     cd /home/user/roft-samples && mkdir build && cd build && \
     cmake -DBUILD_TRACKER:BOOL=ON -DBUILD_REALSENSE:BOOL=ON -DBUILD_HANDOVER:BOOL=ON -DCMAKE_INSTALL_PREFIX=/home/user/roft-samples/install .. && \
     make -j$NJOBS install
