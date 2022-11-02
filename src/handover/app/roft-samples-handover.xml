@@ -1,5 +1,5 @@
 <application>
-    <name>ROFT Track and Grasp</name>
+    <name>ROFT Handover with iCub</name>
 
     <module>
         <name>roft-samples-handover</name>
