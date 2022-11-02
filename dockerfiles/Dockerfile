@@ -65,14 +65,6 @@ RUN git clone https://github.com/lagadic/visp && \
     make -j$NJOBS install
     # we need built tutorials for some scripts of realsense-holder-calibration, hence no removal here
 
-# Build realsense-holder-calibration
-RUN git clone https://github.com/robotology/realsense-holder-calibration && \
-    cd realsense-holder-calibration && \
-    mkdir build && cd build && \
-    cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../ && \
-    make -j$NJOBS install && \
-    rm -rf /realsense-holder-calibration
-
 # Build robotology-superbuild
 RUN git config --global user.name "user" && \
     git config --global user.email "user@email.com" && \
@@ -81,6 +73,15 @@ RUN git config --global user.name "user" && \
     mkdir build && cd build && \
     cmake -DROBOTOLOGY_ENABLE_CORE=ON -DROBOTOLOGY_USES_GAZEBO=OFF -DROBOTOLOGY_USES_PYTHON=ON -DROBOTOLOGY_USES_LUA=ON -DYCM_EP_ADDITIONAL_CMAKE_ARGS:STRING="-DICUB_COMPILE_BINDINGS:BOOL=ON -DCREATE_PYTHON:BOOL=ON -DENABLE_yarpmod_RGBDSensorWrapper:BOOL=ON -DENABLE_yarpmod_RGBDSensorClient:BOOL=ON -DENABLE_yarpcar_mjpeg:BOOL=ON -DENABLE_yarppm_depthimage_to_rgb:BOOL=ON" ../ && \
     make -j$NJOBS
+
+# Build realsense-holder-calibration
+RUN source /robotology-superbuild/build/install/share/robotology-superbuild/setup.sh && \
+    git clone https://github.com/robotology/realsense-holder-calibration && \
+    cd realsense-holder-calibration && \
+    mkdir build && cd build && \
+    cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../ && \
+    make -j$NJOBS install && \
+    rm -rf /realsense-holder-calibration
 
 # Build bayes-filters-lib
 RUN git clone https://github.com/robotology/bayes-filters-lib && \
