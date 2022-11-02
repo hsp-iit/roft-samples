@@ -136,7 +136,7 @@ RUN echo "(setq-default indent-tabs-mode nil)" >> /home/user/.emacs.el && \
 # Build roft-samples
 WORKDIR /home/user
 RUN source /robotology-superbuild/build/install/share/robotology-superbuild/setup.sh && \
-    git clone --progress https://github.com/xenvre/roft-samples && \
+    git clone --progress https://github.com/hsp-iit/roft-samples && \
     cd /home/user/roft-samples && mkdir build && cd build && \
     cmake -DBUILD_TRACKER:BOOL=ON -DBUILD_REALSENSE:BOOL=ON -DBUILD_HANDOVER:BOOL=ON -DCMAKE_INSTALL_PREFIX=/home/user/roft-samples/install .. && \
     make -j$NJOBS install
