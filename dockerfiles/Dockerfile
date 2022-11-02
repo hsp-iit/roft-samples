@@ -33,7 +33,7 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | d
 
 # Install additional dependencies
 RUN apt update && \
-    apt install --no-install-recommends -y -qq eog libassimp-dev libconfig++-dev libglfw3-dev libglew-dev libgtk2.0-dev libglm-dev libeigen3-dev libpython3-dev libtclap-dev && \
+    apt install --no-install-recommends -y -qq eog libassimp-dev libconfig++-dev libglfw3-dev libglew-dev libgtk2.0-dev libglm-dev libeigen3-dev libpython3-dev libtclap-dev libvtk7-dev && \
     git clone https://github.com/robotology/robotology-superbuild && cd robotology-superbuild && bash scripts/install_apt_dependencies.sh && \
     apt remove -y libopencv* && \
     rm -rf /var/lib/apt/lists/*
@@ -162,6 +162,8 @@ RUN mkdir /home/user/.local/share/yarp/contexts/roft-samples-tracker && \
 RUN cp /home/user/roft-samples/install/share/ICUBcontrib/templates/applications/roft-samples-handover.xml /home/user/.local/share/yarp/applications/roft-samples-handover.xml
 RUN mkdir /home/user/.local/share/yarp/contexts/roft-samples-handover && \
     cp /home/user/roft-samples/install/share/ICUBcontrib/contexts/roft-samples-handover/config.ini /home/user/.local/share/yarp/contexts/roft-samples-handover/config.ini
+RUN mkdir /home/user/.local/share/yarp/contexts/roft-samples-grasp-viewer && \
+    cp /home/user/roft-samples/install/share/ICUBcontrib/contexts/roft-samples-grasp-viewer/config.ini /home/user/.local/share/yarp/contexts/roft-samples-grasp-viewer/config.ini
 
 # Launch bash from /home/user
 WORKDIR /home/user
