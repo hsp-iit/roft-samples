@@ -1,0 +1,67 @@
+<application>
+    <name>ROFT Track and Grasp</name>
+
+    <module>
+        <name>roft-track-n-grasp</name>
+        <node>localhost</node>
+    </module>
+
+    <module>
+        <name>roft-grasp-viewer</name>
+        <node>localhost</node>
+    </module>
+
+    <module>
+        <name>speechRecognizer</name>
+        <node>r1-vm-windows</node>
+    </module>
+
+    <module>
+        <name>roft-track-n-grasp-speech.lua</name>
+        <node>localhost</node>
+        <deployer>lua</deployer>
+    </module>
+
+    <connection>
+        <from>/roft-track-n-grasp/segmentation/rpc:o</from>
+        <to>/detectron2/rpc:i</to>
+        <protocol>fast_tcp</protocol>
+    </connection>
+
+    <connection>
+        <from>/roft-track-n-grasp/pose/rpc:o</from>
+        <to>/dope/rpc:i</to>
+        <protocol>fast_tcp</protocol>
+    </connection>
+
+    <connection>
+        <from>/roft-track-n-grasp/tracker/rpc:o</from>
+        <to>/roft-tracker/rpc:i</to>
+        <protocol>fast_tcp</protocol>
+    </connection>
+
+    <connection>
+        <from>/roft-tracker/probe/state:o</from>
+        <to>/roft-track-n-grasp/tracker/state:i</to>
+        <protocol>fast_tcp</protocol>
+    </connection>
+
+    <connection>
+      <from>/roft-track-n-grasp/face_expression:o</from>
+      <to>/icub/face/emotions/in</to>
+      <protocol>fast_tcp</protocol>
+    </connection>
+
+    <connection>
+      <from>/roft-track-n-grasp/speech/object:o</from>
+      <to>/roft-track-n-grasp/rpc:i</to>
+      <protocol>fast_tcp</protocol>
+    </connection>
+
+    <connection>
+      <from>/roft-track-n-grasp/grasp-data:o</from>
+      <to>/roft-grasp-viewer/grasp-data:i</to>
+      <protocol>unix_stream</protocol>
+    </connection>
+
+</application>

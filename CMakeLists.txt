@@ -38,5 +38,6 @@ if (BUILD_REALSENSE)
 endif()
 
 if (BUILD_HANDOVER)
-   add_subdirectory(src/handover)
+  add_subdirectory(src/grasp-data)
+  add_subdirectory(src/handover)
 endif()
