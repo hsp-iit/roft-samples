@@ -13,8 +13,9 @@
     </module>
 
     <module>
-        <name>realsense-holder-calibration</name>
+        <name>realsense-holder-publisher</name>
         <node>localhost</node>
+        <parameters>--from config_half_tilted.ini</parameters>
     </module>
 
     <module>
