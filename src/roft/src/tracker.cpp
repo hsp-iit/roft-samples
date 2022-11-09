@@ -225,6 +225,7 @@ Tracker::Tracker(ResourceFinder& rf)
     std::cout << "Pose:" << std::endl;
 
     std::cout << "- source: " << pose_source << std::endl << std::endl;
+    std::cout << "- feedback: " << pose_feedback << std::endl << std::endl;
 
     std::cout << "Segmentation:" << std::endl;
 
