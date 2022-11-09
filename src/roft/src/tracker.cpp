@@ -148,6 +148,7 @@ Tracker::Tracker(ResourceFinder& rf)
     std::cout << "Camera:" << std::endl;
 
     std::cout << "- source: " << camera_source << std::endl << std::endl;
+
     if (camera_source == "YARP")
     {
         std::cout << "- width: " << camera_width << std::endl;
@@ -155,7 +156,7 @@ Tracker::Tracker(ResourceFinder& rf)
         std::cout << "- fx: " << camera_fx << std::endl;
         std::cout << "- fy: " << camera_fy << std::endl;
         std::cout << "- cx: " << camera_cx << std::endl;
-        std::cout << "- cy: " << camera_cy << std::endl;
+        std::cout << "- cy: " << camera_cy << std::endl << std::endl;;
     }
 
     std::cout << "Initial conditions:" << std::endl;
@@ -206,7 +207,7 @@ Tracker::Tracker(ResourceFinder& rf)
     std::cout << "- model_name: " << model_name << std::endl;
     std::cout << "- model_use_internal_db: " << model_use_internal_db << std::endl;
     std::cout << "- model_internal_db_name: " << model_internal_db_name << std::endl;
-    std::cout << "- model_external_path: " << model_external_path << std::endl << std::endl;
+    std::cout << "- model_external_path: " << model_external_path << std::endl;
     std::cout << "- textured_model_external_path: " << textured_model_external_path << std::endl << std::endl;
 
     std::cout << "Optical flow:" << std::endl;
@@ -230,7 +231,7 @@ Tracker::Tracker(ResourceFinder& rf)
     std::cout << "Segmentation:" << std::endl;
 
     std::cout << "- source: " << segmentation_source << std::endl;
-    std::cout << "- flow_aided: " << flow_aided_segmentation << std::endl << std::endl;
+    std::cout << "- flow_aided: " << flow_aided_segmentation << std::endl;
     std::cout << "- wait_initialization: " << wait_segmentation_initialization << std::endl << std::endl;
 
     std::cout << "Unscented transform:" << std::endl;
