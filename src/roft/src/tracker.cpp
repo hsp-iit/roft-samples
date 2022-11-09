@@ -125,6 +125,7 @@ Tracker::Tracker(ResourceFinder& rf)
 
     const Bottle& pose_bottle = rf.findGroup("POSE");
     const std::string pose_source = pose_bottle.check("source", Value("YARP")).asString();
+    const std::string pose_feedback = pose_bottle.check("feedback", Value("RGB")).asString();
 
    /* Segmentation. */
     const Bottle rf_segmentation = rf.findGroup("SEGMENTATION");
@@ -321,7 +322,7 @@ Tracker::Tracker(ResourceFinder& rf)
     std::shared_ptr<RobotsIO::Utils::Transform> pose;
     if (pose_source == "YARP")
     {
-        pose = std::make_shared<TransformYarpPort>("/" + log_name_ + "/pose", true);
+        pose = std::make_shared<TransformYarpPort>("/" + log_name_ + "/pose", pose_feedback == "RGB", pose_feedback == "DepthSegmentation");
     }
     else
         throw(std::runtime_error(log_name_ + "::ctor. Error: unknown pose source " + pose_source + "."));
@@ -362,7 +363,9 @@ Tracker::Tracker(ResourceFinder& rf)
         use_pose_measurement, use_pose_resync, outlier_rejection_enable, outlier_rejection_gain,
         use_velocity_measurement, flow_weighting, flow_aided_segmentation, wait_segmentation_initialization,
         /* The reference frame in which the pose has to be expressed. */
-        output_format_reference_frame
+        output_format_reference_frame,
+        /* The kind of visual feedback the pose source requires to run. */
+        pose_feedback
     );
 
     {
