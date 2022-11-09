@@ -64,7 +64,8 @@ public:
         const bool flow_weighting,
         const bool flow_aided_segmentation,
         const bool wait_segmentation_initialization,
-        const std::string& pose_reference_frame
+        const std::string& pose_reference_frame,
+        const std::string& pose_meas_feedback
     );
 
     virtual ~ROFTFilter();

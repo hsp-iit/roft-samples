@@ -58,7 +58,8 @@ ROFTFilter::ROFTFilter
     const bool flow_weighting,
     const bool flow_aided_segmentation,
     const bool wait_segmentation_initialization,
-    const std::string& pose_reference_frame
+    const std::string& pose_reference_frame,
+    const std::string& pose_meas_feedback
 ) :
     p_pred_belief_(9, 1, true),
     p_corr_belief_(9, 1, true),
@@ -151,8 +152,12 @@ ROFTFilter::ROFTFilter
     /* Pose/Velocity measurement. */
     auto measurement_model = std::unique_ptr<CartesianQuaternionMeasurement>
     (
-        new CartesianQuaternionMeasurement(pose_measurement, velocity_, camera_, false, pose_meas, velocity_meas, meas_sigma_position, meas_sigma_quaternion, meas_sigma_linear_velocity, meas_sigma_angular_velocity, /* wait_pose_initialization = */ true, /* enable_log = */ false)
+        new CartesianQuaternionMeasurement(pose_measurement, velocity_, camera_, segmentation_, false, pose_meas, velocity_meas, meas_sigma_position, meas_sigma_quaternion, meas_sigma_linear_velocity, meas_sigma_angular_velocity, /* wait_pose_initialization = */ true, /* enable_log = */ false)
     );
+    if (pose_meas_feedback == "RGB")
+        measurement_model->setProperty("transform_feedback_rgb");
+    else if (pose_meas_feedback == "DepthSegmentation")
+        measurement_model->setProperty("transform_feedback_depth_segmentation");
 
     /* Prediction. */
     p_prediction_ = std::unique_ptr<UKFPrediction>
