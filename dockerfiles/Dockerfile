@@ -155,7 +155,7 @@ RUN mkdir -p /home/user/.local/share/yarp/contexts && \
     echo "export YARP_RUNTIME_DIR=/home/user/.runtime" >> /home/user/.bashrc && \
 #
 # roft-samples-tracker xml and config
-    cp /home/user/roft-samples/install/share/ICUBcontrib/templates/applications/roft.xml /home/user/.local/share/yarp/applications/roft.xml && \
+    cp /home/user/roft-samples/install/share/ICUBcontrib/templates/applications/*.xml /home/user/.local/share/yarp/applications/ && \
     mkdir /home/user/.local/share/yarp/contexts/roft-samples-tracker && \
     cp /home/user/roft-samples/install/share/ICUBcontrib/contexts/roft-samples-tracker/config.ini /home/user/.local/share/yarp/contexts/roft-samples-tracker/config.ini && \
 #
