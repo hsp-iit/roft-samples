@@ -65,7 +65,8 @@ public:
         const bool flow_aided_segmentation,
         const bool wait_segmentation_initialization,
         const std::string& pose_reference_frame,
-        const std::string& pose_meas_feedback
+        const std::string& pose_meas_feedback,
+        const std::string& pose_rendering_style
     );
 
     virtual ~ROFTFilter();
@@ -94,7 +95,9 @@ private:
 
     bfl::Gaussian correct_outlier_rejection(const bfl::Gaussian& prediction, const bool use_buffered_features);
 
-    std::pair<cv::Mat, cv::Mat> render_pose(const cv::Mat& rgb_frame, const Eigen::VectorXd& tracker_pose, const Eigen::VectorXd& pose_measurement);
+    std::pair<cv::Mat, cv::Mat> render_pose_as_mesh(const cv::Mat& rgb_frame, const Eigen::VectorXd& tracker_pose, const Eigen::VectorXd& pose_measurement);
+
+    std::pair<cv::Mat, cv::Mat> render_pose_as_bounding_box(const cv::Mat& rgb_frame, const Eigen::VectorXd& tracker_pose, const Eigen::VectorXd& pose_measurement);
 
     void initialize_renderers();
 
@@ -193,6 +196,8 @@ private:
     /* Renderers initialization status and related. */
 
     bool rendering_initialized_ = false;
+
+    const std::string pose_rendering_style_;
 
     ROFT::ModelParameters model_parameters_;
 

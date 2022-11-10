@@ -59,7 +59,8 @@ ROFTFilter::ROFTFilter
     const bool flow_aided_segmentation,
     const bool wait_segmentation_initialization,
     const std::string& pose_reference_frame,
-    const std::string& pose_meas_feedback
+    const std::string& pose_meas_feedback,
+    const std::string& pose_rendering_style
 ) :
     p_pred_belief_(9, 1, true),
     p_corr_belief_(9, 1, true),
@@ -72,6 +73,7 @@ ROFTFilter::ROFTFilter
     outlier_rejection_gain_(pose_outlier_rejection_gain),
     pose_resync_(pose_resync),
     output_pose_reference_frame_(pose_reference_frame),
+    pose_rendering_style_(pose_rendering_style),
     model_parameters_(model_parameters)
 {
     /* Extract initial conditions. */
@@ -433,12 +435,19 @@ void ROFTFilter::filtering_step()
     if (is_probe("output_pose_render") || is_probe("output_pose_source_render"))
     {
         cv::Mat rgb_frame = rgb.clone();
-        std::tie(render_0, render_1) = render_pose(rgb_frame, p_corr_belief_.mean(), pose_measurement);
+        if (pose_rendering_style_ == "mesh")
+            std::tie(render_0, render_1) = render_pose_as_mesh(rgb_frame, p_corr_belief_.mean(), pose_measurement);
+        else if (pose_rendering_style_ == "bounding_box")
+            std::tie(render_0, render_1) = render_pose_as_bounding_box(rgb_frame, p_corr_belief_.mean(), pose_measurement);
+
     }
-    if (is_probe("output_pose_render"))
-        get_probe("output_pose_render").set_data(render_0);
-    if (is_probe("output_pose_source_render") && (!render_1.empty()))
-        get_probe("output_pose_source_render").set_data(render_1);
+    if ((pose_rendering_style_ == "mesh") || (pose_rendering_style_ == "bounding_box"))
+    {
+        if (is_probe("output_pose_render"))
+            get_probe("output_pose_render").set_data(render_0);
+        if (is_probe("output_pose_source_render") && (!render_1.empty()))
+            get_probe("output_pose_source_render").set_data(render_1);
+    }
 
     /* Output object pose and velocity. */
     VectorXd p_mean(13);
@@ -706,7 +715,7 @@ Gaussian ROFTFilter::correct_outlier_rejection(const Gaussian& prediction, const
 }
 
 
-std::pair<cv::Mat, cv::Mat> ROFTFilter::render_pose(const cv::Mat& rgb_frame, const VectorXd& tracker_pose, const VectorXd& pose_measurement)
+std::pair<cv::Mat, cv::Mat> ROFTFilter::render_pose_as_mesh(const cv::Mat& rgb_frame, const VectorXd& tracker_pose, const VectorXd& pose_measurement)
 {
     std::vector<SICAD::ModelPoseContainer> poses;
     for (const VectorXd& pose : {tracker_pose, pose_measurement})
@@ -761,76 +770,88 @@ std::pair<cv::Mat, cv::Mat> ROFTFilter::render_pose(const cv::Mat& rgb_frame, co
 }
 
 
+std::pair<cv::Mat, cv::Mat> ROFTFilter::render_pose_as_bounding_box(const cv::Mat& rgb_frame, const Eigen::VectorXd& tracker_pose, const Eigen::VectorXd& pose_measurement)
+{
+    ;
+}
+
+
 void ROFTFilter::initialize_renderers()
 {
     /* Depth rendering for outlier rejection. */
     std::tie(std::ignore, camera_parameters_) = camera_->camera_parameters();
-    MeshResource mesh_resource(model_parameters_);
-    std::istringstream mesh_resource_stream(mesh_resource.as_string());
-    SICAD::ModelStreamContainer model;
-    model["object"] = &mesh_resource_stream;
-    std::size_t desired_images = 2;
-    divider_ = 4;
-    if (camera_parameters_.width() == 640)
-        divider_ = 2;
-    renderer_ = std::unique_ptr<SICAD>
-    (
-        new SICAD
-        (
-            model,
-            camera_parameters_.width() / divider_, camera_parameters_.height() / divider_,
-            camera_parameters_.fx() / divider_, camera_parameters_.fy() / divider_,
-            camera_parameters_.cx() / divider_, camera_parameters_.cy() / divider_,
-            desired_images
-        )
-    );
-    renderer_->setOglToCam({1.0, 0.0, 0.0, static_cast<float>(M_PI)});
-    if (renderer_->getTilesNumber() != desired_images)
-        throw(std::runtime_error(log_name_ + "::ctor. Depth rendering cannot provide desired_images = " + std::to_string(desired_images) + " images per iteration."));
 
+    if (outlier_rejection_)
+    {
+        MeshResource mesh_resource(model_parameters_);
+        std::istringstream mesh_resource_stream(mesh_resource.as_string());
+        SICAD::ModelStreamContainer model;
+        model["object"] = &mesh_resource_stream;
+        std::size_t desired_images = 2;
+        divider_ = 4;
+        if (camera_parameters_.width() == 640)
+            divider_ = 2;
+        renderer_ = std::unique_ptr<SICAD>
+            (
+                new SICAD
+                (
+                    model,
+                    camera_parameters_.width() / divider_, camera_parameters_.height() / divider_,
+                    camera_parameters_.fx() / divider_, camera_parameters_.fy() / divider_,
+                    camera_parameters_.cx() / divider_, camera_parameters_.cy() / divider_,
+                    desired_images
+                    )
+                );
+        renderer_->setOglToCam({1.0, 0.0, 0.0, static_cast<float>(M_PI)});
+        if (renderer_->getTilesNumber() != desired_images)
+            throw(std::runtime_error(log_name_ + "::ctor. Depth rendering cannot provide desired_images = " + std::to_string(desired_images) + " images per iteration."));
+    }
 
     /* Output rendering. */
-    if (model_parameters_.textured_mesh_external_path().empty())
+    if (pose_rendering_style_ == "mesh")
     {
-        std::cout << log_name_ + "::ctor. Warning: the path to the textured mesh model is not available. "
-                  << "Output rendering will not be available." << std::endl;
-    }
-    else
-    {
-        SICAD::ModelPathContainer model;
-        model["object"] = model_parameters_.textured_mesh_external_path();
+        if (model_parameters_.textured_mesh_external_path().empty())
+        {
+            std::cout << log_name_ + "::ctor. Warning: the path to the textured mesh model is not available. "
+                      << "Output rendering will not be available." << std::endl;
+        }
+        else
+        {
+            SICAD::ModelPathContainer model;
+            model["object"] = model_parameters_.textured_mesh_external_path();
 
-        output_renderer_0_ = std::unique_ptr<SICAD>
-        (
-            new SICAD
-            (
-                model,
-                camera_parameters_.width(), camera_parameters_.height(),
-                camera_parameters_.fx(), camera_parameters_.fy(),
-                camera_parameters_.cx(), camera_parameters_.cy(),
-                1
-            )
-        );
-        output_renderer_0_->setBackgroundOpt(true);
-        output_renderer_0_->setOglToCam({1.0, 0.0, 0.0, static_cast<float>(M_PI)});
-        if (output_renderer_0_->getTilesNumber() != 1)
-            throw(std::runtime_error(log_name_ + "::ctor. Output rendering cannot allocate space."));
+            output_renderer_0_ = std::unique_ptr<SICAD>
+                (
+                    new SICAD
+                    (
+                        model,
+                        camera_parameters_.width(), camera_parameters_.height(),
+                        camera_parameters_.fx(), camera_parameters_.fy(),
+                        camera_parameters_.cx(), camera_parameters_.cy(),
+                        1
+                        )
+                    );
+            output_renderer_0_->setBackgroundOpt(true);
+            output_renderer_0_->setOglToCam({1.0, 0.0, 0.0, static_cast<float>(M_PI)});
+            if (output_renderer_0_->getTilesNumber() != 1)
+                throw(std::runtime_error(log_name_ + "::ctor. Output rendering cannot allocate space."));
 
-        output_renderer_1_ = std::unique_ptr<SICAD>
-        (
-            new SICAD
-            (
-                model,
-                camera_parameters_.width(), camera_parameters_.height(),
-                camera_parameters_.fx(), camera_parameters_.fy(),
-                camera_parameters_.cx(), camera_parameters_.cy(),
-                1
-            )
-        );
-        output_renderer_1_->setBackgroundOpt(true);
-        output_renderer_1_->setOglToCam({1.0, 0.0, 0.0, static_cast<float>(M_PI)});
-        if (output_renderer_1_->getTilesNumber() != 1)
-            throw(std::runtime_error(log_name_ + "::ctor. Output rendering cannot allocate space."));
+            output_renderer_1_ = std::unique_ptr<SICAD>
+                (
+                    new SICAD
+                    (
+                        model,
+                        camera_parameters_.width(), camera_parameters_.height(),
+                        camera_parameters_.fx(), camera_parameters_.fy(),
+                        camera_parameters_.cx(), camera_parameters_.cy(),
+                        1
+                        )
+                    );
+            output_renderer_1_->setBackgroundOpt(true);
+            output_renderer_1_->setOglToCam({1.0, 0.0, 0.0, static_cast<float>(M_PI)});
+            if (output_renderer_1_->getTilesNumber() != 1)
+                throw(std::runtime_error(log_name_ + "::ctor. Output rendering cannot allocate space."));
+        }
     }
 
     /* Set status flag. */

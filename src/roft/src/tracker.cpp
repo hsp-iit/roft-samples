@@ -127,6 +127,11 @@ Tracker::Tracker(ResourceFinder& rf)
     const std::string pose_source = pose_bottle.check("source", Value("YARP")).asString();
     const std::string pose_feedback = pose_bottle.check("feedback", Value("RGB")).asString();
 
+    /* Pose rendering .*/
+
+    const Bottle& pose_rendering_bottle = rf.findGroup("POSE_RENDERING");
+    const std::string pose_rendering_style = pose_rendering_bottle.check("style", Value("mesh")).asString();
+
    /* Segmentation. */
     const Bottle rf_segmentation = rf.findGroup("SEGMENTATION");
     const std::string segmentation_source = rf_segmentation.check("source", Value("")).asString();
@@ -227,6 +232,10 @@ Tracker::Tracker(ResourceFinder& rf)
 
     std::cout << "- source: " << pose_source << std::endl;
     std::cout << "- feedback: " << pose_feedback << std::endl << std::endl;
+
+    std::cout << "Pose rendering:" << std::endl;
+
+    std::cout << "- style: " << pose_rendering_style << std::endl << std::endl;
 
     std::cout << "Segmentation:" << std::endl;
 
@@ -367,7 +376,9 @@ Tracker::Tracker(ResourceFinder& rf)
         /* The reference frame in which the pose has to be expressed. */
         output_format_reference_frame,
         /* The kind of visual feedback the pose source requires to run. */
-        pose_feedback
+        pose_feedback,
+        /* The kind of rendering style to use in the output probes. */
+        pose_rendering_style
     );
 
     {
