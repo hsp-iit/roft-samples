@@ -785,15 +785,70 @@ std::pair<cv::Mat, cv::Mat> ROFTFilter::render_pose_as_bounding_box(const cv::Ma
     if (bounding_box_points.size() != 0)
     {
         render_1 = rgb_frame.clone();
+        /* Find points placement. */
+        MatrixXd points_offset = bounding_box_points.colwise() + (-pose_measurement.segment<3>(6));
+        Quaterniond quaternion(pose_measurement(9), pose_measurement(10), pose_measurement(11), pose_measurement(12));
+        Matrix3d rotation = quaternion.toRotationMatrix();
+        MatrixXd points_object = rotation.transpose() * points_offset;
+
+        std::unordered_map<int, std::string> mapping;
+        for (std::size_t i = 0; i < points_object.cols(); i++)
+        {
+            const double& x = points_object.col(i)(0);
+            const double& y = points_object.col(i)(1);
+            const double& z = points_object.col(i)(2);
+
+            if (z > 0)
+            {
+                if (x >0)
+                {
+                    if (y > 0)
+                        mapping[i] = "top_right_back";
+                    else
+                        mapping[i] = "top_right_front";
+                }
+                else
+                {
+                    if (y > 0)
+                        mapping[i] = "top_left_back";
+                    else
+                        mapping[i] = "top_left_front";
+                }
+            }
+            else
+            {
+                if (x >0)
+                {
+                    if (y > 0)
+                        mapping[i] = "bottom_right_back";
+                    else
+                        mapping[i] = "bottom_right_front";
+                }
+                else
+                {
+                    if (y > 0)
+                        mapping[i] = "bottom_left_back";
+                    else
+                        mapping[i] = "bottom_left_front";
+                }
+            }
+        }
+
+        std::unordered_map<std::string, cv::Point> vertex_coordinates;
+        /* Draw vertices. */
         for (std::size_t i = 0; i < bounding_box_points.cols(); i++)
         {
-            /* Find pixel coordinates. */
             const VectorXd& point = bounding_box_points.col(i);
             const unsigned int u = camera_parameters_.cx() + camera_parameters_.fx() * point(0) / point(2);
             const unsigned int v = camera_parameters_.cy() + camera_parameters_.fy() * point(1) / point(2);
 
             cv::circle(render_1, cv::Point(u, v), 5, cv::Scalar(255, 150, 0), cv::FILLED);
+
+            vertex_coordinates[mapping.at(i)] = cv::Point(u, v);
         }
+
+        /* Draw lines. */
+        cv::line(render_1, vertex_coordinates["top_right_front"], vertex_coordinates["top_left_front"], cv::Scalar(255, 150, 0), 3);
     }
 
     return std::make_pair(render_0, render_1);
