@@ -115,8 +115,10 @@ ROFTFilter::ROFTFilter
         new SpatialVelocityModel(v_cov_v, v_cov_w)
     );
 
-    /* Save pointer to original segmentation source for debugging purposes. */
+    /* These are only required to extract the incoming mask and pose measurements , for visualization purposes. */
     segmentation_source_ = segmentation_source;
+    pose_measurement_ = pose_measurement;
+    /* */
 
     /* Segmentation measurement. */
     if (flow_aided_segmentation)
@@ -329,6 +331,7 @@ void ROFTFilter::filtering_step()
 
     /* This is only required to extract the incoming pose measurement, for visualization purposes. */
     VectorXd pose_measurement;
+    MatrixXd pose_bbox_points;
 
     /* UKF pose filtering. */
     p_prediction_->predict(p_corr_belief_, p_pred_belief_);
@@ -343,6 +346,8 @@ void ROFTFilter::filtering_step()
             std::tie(std::ignore, measurement_data) = p_correction_->getMeasurementModel().measure();
             measurement = bfl::any::any_cast<MatrixXd>(measurement_data);
             pose_measurement = measurement.col(0);
+
+            pose_bbox_points = pose_measurement_->bounding_box();
             /* */
 
             if (pose_resync_)

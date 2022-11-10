@@ -129,6 +129,8 @@ private:
 
     std::shared_ptr<RobotsIO::Utils::Segmentation> segmentation_source_;
 
+    std::shared_ptr<RobotsIO::Utils::Transform> pose_measurement_;
+
     std::shared_ptr<RobotsIO::Utils::SpatialVelocityBuffer> velocity_;
 
     const double maximum_depth_;
