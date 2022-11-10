@@ -1,0 +1,117 @@
+<application>
+    <name>ROFT with HyperPCR</name>
+
+    <module>
+        <name>roft-samples-tracker</name>
+        <node>localhost</node>
+        <parameters>--OUTPUT_FORMAT::reference_frame root --POSE::feedback DepthSegmentation --OUTLIER_REJECTION::enable false</parameters>
+    </module>
+
+    <module>
+        <name>roft-samples-rs</name>
+        <node>localhost</node>
+    </module>
+
+    <module>
+        <name>realsense-holder-publisher</name>
+        <node>localhost</node>
+        <parameters>--from config_half_tilted.ini</parameters>
+    </module>
+
+    <module>
+        <name>yarpview</name>
+        <parameters>--name /roft-samples-tracker/viewer/segmentation:i --compact --w 576 --h 432 --x 100 --y 100 </parameters>
+        <node>localhost</node>
+    </module>
+
+    <module>
+        <name>yarpview</name>
+        <parameters>--name /roft-samples-tracker/viewer/refined_segmentation:i --synch --compact --w 576 --h 432 --x 712 --y 100</parameters>
+        <node>localhost</node>
+    </module>
+
+    <module>
+        <name>yarpview</name>
+        <parameters>--name /roft-samples-tracker/viewer/pose_estimation:i --compact --w 576 --h 432 --x 100 --y 584</parameters>
+        <node>localhost</node>
+    </module>
+
+    <module>
+        <name>yarpview</name>
+        <parameters>--name /roft-samples-tracker/viewer/pose_render:i --synch --compact --w 576 --h 432 --x 712 --y 584</parameters>
+        <node>localhost</node>
+    </module>
+
+    <connection>
+        <from>/roft-samples-tracker/segmentation/rgb:o</from>
+        <to>/detectron2/rgb:i</to>
+        <protocol>mjpeg</protocol>
+    </connection>
+
+    <connection>
+        <from>/depthCamera/depthImage:o</from>
+        <to>/roft-samples-tracker/camera/depth:i</to>
+        <protocol>fast_tcp</protocol>
+    </connection>
+
+    <connection>
+        <from>/depthCamera/rgbImage:o</from>
+        <to>/roft-samples-tracker/camera/rgb:i</to>
+        <protocol>fast_tcp</protocol>
+    </connection>
+
+    <connection>
+        <from>/realsense-holder-publisher/pose:o</from>
+        <to>/roft-samples-tracker/camera/pose:i</to>
+        <protocol>fast_tcp</protocol>
+    </connection>
+
+    <connection>
+        <from>/detectron2/mask:o</from>
+        <to>/roft-samples-tracker/segmentation/segmentation:i</to>
+        <protocol>fast_tcp</protocol>
+    </connection>
+
+    <connection>
+        <from>/roft-samples-tracker/probe/segmentation:o</from>
+        <to>/roft-samples-tracker/viewer/refined_segmentation:i</to>
+        <protocol>unix_stream</protocol>
+    </connection>
+
+    <connection>
+        <from>/roft-samples-tracker/probe/segmentation_source:o</from>
+        <to>/roft-samples-tracker/viewer/segmentation:i</to>
+        <protocol>unix_stream</protocol>
+    </connection>
+
+    <connection>
+        <from>/roft-samples-tracker/probe/pose_source_render:o</from>
+        <to>/roft-samples-tracker/viewer/pose_estimation:i</to>
+        <protocol>unix_stream</protocol>
+    </connection>
+
+    <connection>
+        <from>/roft-samples-tracker/probe/outlier_rejection:o</from>
+        <to>/roft-samples-tracker/viewer/outlier_rejection:i</to>
+        <protocol>unix_stream</protocol>
+    </connection>
+
+    <connection>
+        <from>/roft-samples-tracker/probe/pose_render:o</from>
+        <to>/roft-samples-tracker/viewer/pose_render:i</to>
+        <protocol>unix_stream</protocol>
+    </connection>
+
+    <connection>
+        <from>/hyperpcr/pose:o</from>
+        <to>/roft-samples-tracker/pose/transform:i</to>
+        <protocol>fast_tcp</protocol>
+    </connection>
+
+    <connection>
+        <from>/roft-samples-tracker/pose/depth_segmentation:o</from>
+        <to>/hyperpcr/images:i</to>
+        <protocol>fast_tcp</protocol>
+    </connection>
+
+</application>
