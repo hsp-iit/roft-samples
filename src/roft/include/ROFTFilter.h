@@ -97,7 +97,7 @@ private:
 
     std::pair<cv::Mat, cv::Mat> render_pose_as_mesh(const cv::Mat& rgb_frame, const Eigen::VectorXd& tracker_pose, const Eigen::VectorXd& pose_measurement);
 
-    std::pair<cv::Mat, cv::Mat> render_pose_as_bounding_box(const cv::Mat& rgb_frame, const Eigen::VectorXd& tracker_pose, const Eigen::VectorXd& pose_measurement);
+    std::pair<cv::Mat, cv::Mat> render_pose_as_bounding_box(const cv::Mat& rgb_frame, const Eigen::VectorXd& tracker_pose, const Eigen::VectorXd& pose_measurement, const Eigen::MatrixXd& bounding_box_points);
 
     void initialize_renderers();
 

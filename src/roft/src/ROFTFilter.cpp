@@ -443,7 +443,7 @@ void ROFTFilter::filtering_step()
         if (pose_rendering_style_ == "mesh")
             std::tie(render_0, render_1) = render_pose_as_mesh(rgb_frame, p_corr_belief_.mean(), pose_measurement);
         else if (pose_rendering_style_ == "bounding_box")
-            std::tie(render_0, render_1) = render_pose_as_bounding_box(rgb_frame, p_corr_belief_.mean(), pose_measurement);
+            std::tie(render_0, render_1) = render_pose_as_bounding_box(rgb_frame, p_corr_belief_.mean(), pose_measurement, pose_bbox_points);
 
     }
     if ((pose_rendering_style_ == "mesh") || (pose_rendering_style_ == "bounding_box"))
@@ -775,9 +775,28 @@ std::pair<cv::Mat, cv::Mat> ROFTFilter::render_pose_as_mesh(const cv::Mat& rgb_f
 }
 
 
-std::pair<cv::Mat, cv::Mat> ROFTFilter::render_pose_as_bounding_box(const cv::Mat& rgb_frame, const Eigen::VectorXd& tracker_pose, const Eigen::VectorXd& pose_measurement)
+std::pair<cv::Mat, cv::Mat> ROFTFilter::render_pose_as_bounding_box(const cv::Mat& rgb_frame, const Eigen::VectorXd& tracker_pose, const Eigen::VectorXd& pose_measurement, const Eigen::MatrixXd& bounding_box_points)
 {
-    ;
+    cv::Mat render_0;
+    cv::Mat render_1;
+
+    render_0 = rgb_frame.clone();
+
+    if (bounding_box_points.size() != 0)
+    {
+        render_1 = rgb_frame.clone();
+        for (std::size_t i = 0; i < bounding_box_points.cols(); i++)
+        {
+            /* Find pixel coordinates. */
+            const VectorXd& point = bounding_box_points.col(i);
+            const unsigned int u = camera_parameters_.cx() + camera_parameters_.fx() * point(0) / point(2);
+            const unsigned int v = camera_parameters_.cy() + camera_parameters_.fy() * point(1) / point(2);
+
+            cv::circle(render_1, cv::Point(u, v), 5, cv::Scalar(255, 150, 0), cv::FILLED);
+        }
+    }
+
+    return std::make_pair(render_0, render_1);
 }
 
 
