@@ -204,6 +204,11 @@ bool ROFTFilter::run_condition()
 
 bool ROFTFilter::initialization_step()
 {
+    /* Initialize timers. */
+    auto now = std::chrono::steady_clock::now();
+    time_since_last_measurement_0_ = now;
+    time_since_last_measurement_1_ = now;
+
     /* Initialize Gaussian belief. */
     v_corr_belief_.mean().head<3>() = v_v_0_;
     v_corr_belief_.mean().tail<3>() = v_w_0_;
@@ -264,6 +269,19 @@ std::vector<std::string> ROFTFilter::log_file_names(const std::string& prefix_pa
 
 void ROFTFilter::filtering_step()
 {
+    /* Check if we are stuck. */
+    auto now = std::chrono::steady_clock::now();
+    double elapsed_0 = std::chrono::duration_cast<std::chrono::milliseconds>(now - time_since_last_measurement_0_).count() / 1000.0;
+    double elapsed_1 = std::chrono::duration_cast<std::chrono::milliseconds>(now - time_since_last_measurement_1_).count() / 1000.0;
+    if ((elapsed_0 > timeout_) || (elapsed_1 > timeout_))
+    {
+        time_since_last_measurement_0_ = now;
+        time_since_last_measurement_1_ = now;
+        reset();
+        std::cout << log_name_ + "::filteringStep. Warning: resetting as not hearing from the pose/segmentation sources." << std::endl;
+        return;
+    }
+
     bool data_in;
 
     /* Freeze camera. */
@@ -295,6 +313,12 @@ void ROFTFilter::filtering_step()
 
     /* Freeze flow. */
     data_in &= v_correction_->getMeasurementModel().freeze(std::make_pair(ImageOpticalFlowMeasurementBase::FreezeType::ExceptStepSource, elapsed_time));
+
+    /* Check if segmentation source is still alive. */
+    bool is_segmentation_alive;
+    std::tie(is_segmentation_alive, std::ignore) = segmentation_source_->latest_segmentation();
+    if (is_segmentation_alive)
+        time_since_last_measurement_1_ = std::chrono::steady_clock::now();
 
     if (data_in)
     {
@@ -340,6 +364,8 @@ void ROFTFilter::filtering_step()
     {
         if (p_correction_->getMeasurementModel().getMeasurementDescription().total_size() == 13)
         {
+            time_since_last_measurement_0_ = std::chrono::steady_clock::now();
+
             /* This is only required to extract the incoming pose measurement, for visualization purposes. */
             MatrixXd measurement;
             bfl::Data measurement_data;

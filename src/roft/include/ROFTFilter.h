@@ -185,6 +185,12 @@ private:
 
     std::chrono::steady_clock::time_point std_time_0_;
 
+    std::chrono::steady_clock::time_point time_since_last_measurement_0_;
+
+    std::chrono::steady_clock::time_point time_since_last_measurement_1_;
+
+    double timeout_ = 3.0;
+
     double last_camera_stamp_ = -1;
 
     const double sample_time_;
