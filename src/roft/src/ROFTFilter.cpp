@@ -785,9 +785,12 @@ std::pair<cv::Mat, cv::Mat> ROFTFilter::render_pose_as_mesh(const cv::Mat& rgb_f
     cv::cvtColor(rgb_frame, render_0, cv::COLOR_RGB2GRAY);
     cv::cvtColor(render_0, render_0, cv::COLOR_GRAY2RGB);
 
-    /* Do rendering. */
-    bool outcome = output_renderer_0_->superimpose(poses.at(0), cam_x, cam_o, render_0);
-    cv::cvtColor(render_0, render_0, cv::COLOR_RGB2BGR);
+    /* Do rendering if the position is not all zeros. */
+    if (!tracker_pose.segment<3>(6).isZero(1e-4))
+    {
+        output_renderer_0_->superimpose(poses.at(0), cam_x, cam_o, render_0);
+        cv::cvtColor(render_0, render_0, cv::COLOR_RGB2BGR);
+    }
 
     if (poses.size() == 2)
     {
@@ -795,7 +798,7 @@ std::pair<cv::Mat, cv::Mat> ROFTFilter::render_pose_as_mesh(const cv::Mat& rgb_f
         cv::cvtColor(rgb_frame, render_1, cv::COLOR_RGB2GRAY);
         cv::cvtColor(render_1, render_1, cv::COLOR_GRAY2RGB);
 
-        outcome &= output_renderer_1_->superimpose(poses.at(1), cam_x, cam_o, render_1);
+        output_renderer_1_->superimpose(poses.at(1), cam_x, cam_o, render_1);
         cv::cvtColor(render_1, render_1, cv::COLOR_RGB2BGR);
     }
 
@@ -820,7 +823,11 @@ void ROFTFilter::update_bounding_box_representation(const VectorXd& tracker_pose
         Quaterniond quaternion(tracker_pose(9), tracker_pose(10), tracker_pose(11), tracker_pose(12));
         Matrix3d rotation = quaternion.toRotationMatrix();
 
-        bbox_tracked_points_ = (rotation * bbox_local_points_).colwise() + center;
+        /* Evaluate the new points only if the position is not all zeros. */
+        if (center.isZero(1e-4))
+            bbox_tracked_points_ = MatrixXd();
+        else
+            bbox_tracked_points_ = (rotation * bbox_local_points_).colwise() + center;
     }
 }
 
