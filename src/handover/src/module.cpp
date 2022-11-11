@@ -377,7 +377,9 @@ bool Module::updateModule()
     bool valid_pose;
     Pose pose;
     Vector3d velocity;
-    std::tie(valid_pose, pose, velocity) = get_object_state();
+    MatrixXd points;
+
+    std::tie(valid_pose, pose, velocity, points) = get_object_state();
 
     /* Update reception time. */
     if (valid_pose)
@@ -576,7 +578,7 @@ std::string Module::select_object(const std::string& object_name)
 }
 
 
-std::tuple<bool, Eigen::Transform<double, 3, Eigen::Affine>, Vector3d> Module::get_object_state()
+std::tuple<bool, Eigen::Transform<double, 3, Eigen::Affine>, Vector3d, MatrixXd> Module::get_object_state()
 {
     yarp::sig::Vector* state_yarp = port_state_.read(is_pose_input_buffered_);
 
@@ -596,21 +598,36 @@ std::tuple<bool, Eigen::Transform<double, 3, Eigen::Affine>, Vector3d> Module::g
         return velocity;
     };
 
+    auto yarp_to_points = [](const yarp::sig::Vector& vector) -> MatrixXd
+    {
+        Eigen::VectorXd bbox_points_data = toEigen(vector).segment<24>(7 + 6);
+        MatrixXd points(3, 8);
+        for (std::size_t i = 0; i < 8; i++)
+            points.col(i) = bbox_points_data.segment<3>(3 * i);
+
+        return points;
+    };
+
     if (state_yarp == nullptr)
     {
         if(is_pose_input_buffered_ && is_first_state_)
-            return std::make_tuple(true, last_object_pose_, last_object_velocity_);
+            return std::make_tuple(true, last_object_pose_, last_object_velocity_, last_object_points_);
         else
-            return std::make_tuple(false, Pose::Identity(), Vector3d::Zero());
+            return std::make_tuple(false, Pose::Identity(), Vector3d::Zero(), MatrixXd());
     }
     else
     {
         last_object_pose_ = yarp_to_transform(*state_yarp);
         last_object_velocity_ = yarp_to_velocity(*state_yarp);
 
+        /* FIXME: we should use a more general object here that handles the object pose, velocity and bounding box points. */
+        /* Check if object bounding box points have been transmitted. */
+        if(state_yarp->size() == (7 + 6 + 8 * 3))
+            last_object_points_ = yarp_to_points(*state_yarp);
+
         is_first_state_ = true;
 
-        return std::make_tuple(true, last_object_pose_, last_object_velocity_);
+        return std::make_tuple(true, last_object_pose_, last_object_velocity_, last_object_points_);
     }
 }
 

@@ -52,7 +52,7 @@ private:
     /**
      * Get object state and validation.
      */
-    std::tuple<bool, Eigen::Transform<double, 3, Eigen::Affine>, Eigen::Vector3d> get_object_state();
+    std::tuple<bool, Eigen::Transform<double, 3, Eigen::Affine>, Eigen::Vector3d, Eigen::MatrixXd> get_object_state();
 
     bool is_pose_gaze_safe(const Eigen::Transform<double, 3, Eigen::Affine>& pose);
 
@@ -215,6 +215,8 @@ private:
     Eigen::Transform<double, 3, Eigen::Affine> grasp_object_pose_;
 
     Eigen::Vector3d last_object_velocity_;
+
+    Eigen::MatrixXd last_object_points_;
 
     const bool is_pose_input_buffered_ = false;
 
