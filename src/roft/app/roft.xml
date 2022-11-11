@@ -49,6 +49,12 @@
     </connection>
 
     <connection>
+        <from>/roft-samples-tracker/segmentation/rgb:o</from>
+        <to>/detection/image_inference:i</to>
+        <protocol>mjpeg</protocol>
+    </connection>
+
+    <connection>
         <from>/depthCamera/depthImage:o</from>
         <to>/roft-samples-tracker/camera/depth:i</to>
         <protocol>fast_tcp</protocol>
