@@ -95,9 +95,11 @@ private:
 
     bfl::Gaussian correct_outlier_rejection(const bfl::Gaussian& prediction, const bool use_buffered_features);
 
+    void update_bounding_box_representation(const Eigen::VectorXd& tracker_pose, const Eigen::VectorXd& pose_measurement, const Eigen::MatrixXd& measured_points);
+
     std::pair<cv::Mat, cv::Mat> render_pose_as_mesh(const cv::Mat& rgb_frame, const Eigen::VectorXd& tracker_pose, const Eigen::VectorXd& pose_measurement);
 
-    std::pair<cv::Mat, cv::Mat> render_pose_as_bounding_box(const cv::Mat& rgb_frame, const Eigen::VectorXd& tracker_pose, const Eigen::VectorXd& pose_measurement, const Eigen::MatrixXd& bounding_box_points);
+    std::pair<cv::Mat, cv::Mat> render_pose_as_bounding_box(const cv::Mat& rgb_frame, const Eigen::MatrixXd& bounding_box_points);
 
     void initialize_renderers();
 
@@ -195,9 +197,11 @@ private:
 
     const std::string output_pose_reference_frame_;
 
-    Eigen::MatrixXd rendering_local_points_;
+    Eigen::MatrixXd bbox_local_points_;
 
-    std::unordered_map<int, std::string> rendering_points_mapping_;
+    Eigen::MatrixXd bbox_tracked_points_;
+
+    std::unordered_map<int, std::string> bbox_local_points_mapping_;
 
     /* Renderers initialization status and related. */
 

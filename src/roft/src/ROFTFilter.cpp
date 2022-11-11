@@ -331,7 +331,7 @@ void ROFTFilter::filtering_step()
 
     /* This is only required to extract the incoming pose measurement, for visualization purposes. */
     VectorXd pose_measurement;
-    MatrixXd pose_bbox_points;
+    MatrixXd bbox_measured_points;
 
     /* UKF pose filtering. */
     p_prediction_->predict(p_corr_belief_, p_pred_belief_);
@@ -347,7 +347,7 @@ void ROFTFilter::filtering_step()
             measurement = bfl::any::any_cast<MatrixXd>(measurement_data);
             pose_measurement = measurement.col(0);
 
-            pose_bbox_points = pose_measurement_->bounding_box();
+            bbox_measured_points = pose_measurement_->bounding_box();
             /* */
 
             if (pose_resync_)
@@ -388,6 +388,8 @@ void ROFTFilter::filtering_step()
     else
         p_corr_belief_ = p_pred_belief_;
 
+    /* Update internal bounding box representation. */
+    update_bounding_box_representation(p_corr_belief_.mean(), pose_measurement, bbox_measured_points);
 
     /* Get current RGB input and pose, required to provide several outputs. */
     bfl::Data camera_data;
@@ -443,7 +445,7 @@ void ROFTFilter::filtering_step()
         if (pose_rendering_style_ == "mesh")
             std::tie(render_0, render_1) = render_pose_as_mesh(rgb_frame, p_corr_belief_.mean(), pose_measurement);
         else if (pose_rendering_style_ == "bounding_box")
-            std::tie(render_0, render_1) = render_pose_as_bounding_box(rgb_frame, p_corr_belief_.mean(), pose_measurement, pose_bbox_points);
+            std::tie(render_0, render_1) = render_pose_as_bounding_box(rgb_frame, bbox_measured_points);
 
     }
     if ((pose_rendering_style_ == "mesh") || (pose_rendering_style_ == "bounding_box"))
@@ -775,7 +777,29 @@ std::pair<cv::Mat, cv::Mat> ROFTFilter::render_pose_as_mesh(const cv::Mat& rgb_f
 }
 
 
-std::pair<cv::Mat, cv::Mat> ROFTFilter::render_pose_as_bounding_box(const cv::Mat& rgb_frame, const Eigen::VectorXd& tracker_pose, const Eigen::VectorXd& pose_measurement, const Eigen::MatrixXd& measured_points)
+void ROFTFilter::update_bounding_box_representation(const VectorXd& tracker_pose, const VectorXd& pose_measurement, const MatrixXd& measured_points)
+{
+    if (measured_points.size() != 0)
+    {
+        const Vector3d& center = pose_measurement.segment<3>(6);
+        Quaterniond quaternion(pose_measurement(9), pose_measurement(10), pose_measurement(11), pose_measurement(12));
+        Matrix3d rotation = quaternion.toRotationMatrix();
+
+        bbox_local_points_ = rotation.transpose() * (measured_points.colwise() + (-center));
+    }
+
+    if (bbox_local_points_.size() != 0)
+    {
+        const Vector3d& center = tracker_pose.segment<3>(6);
+        Quaterniond quaternion(tracker_pose(9), tracker_pose(10), tracker_pose(11), tracker_pose(12));
+        Matrix3d rotation = quaternion.toRotationMatrix();
+
+        bbox_tracked_points_ = (rotation * bbox_local_points_).colwise() + center;
+    }
+}
+
+
+std::pair<cv::Mat, cv::Mat> ROFTFilter::render_pose_as_bounding_box(const cv::Mat& rgb_frame, const MatrixXd& measured_points)
 {
     /* Utilities. */
     auto index_to_str = [](const Eigen::MatrixXd& local_points) -> std::unordered_map<int, std::string>
@@ -855,28 +879,18 @@ std::pair<cv::Mat, cv::Mat> ROFTFilter::render_pose_as_bounding_box(const cv::Ma
 
     render_0 = rgb_frame.clone();
 
-    if (measured_points.size() != 0)
+    if ((measured_points.size() != 0) && (bbox_local_points_.size() != 0))
     {
         render_1 = rgb_frame.clone();
 
-        const Vector3d& center = pose_measurement.segment<3>(6);
-        Quaterniond quaternion(pose_measurement(9), pose_measurement(10), pose_measurement(11), pose_measurement(12));
-        Matrix3d rotation = quaternion.toRotationMatrix();
-
-        rendering_local_points_ = rotation.transpose() * (measured_points.colwise() + (-center));
-        rendering_points_mapping_ = index_to_str(rendering_local_points_);
-        auto box_str_to_uv = str_to_uv(measured_points, rendering_points_mapping_);
+        bbox_local_points_mapping_ = index_to_str(bbox_local_points_);
+        auto box_str_to_uv = str_to_uv(measured_points, bbox_local_points_mapping_);
         draw_points(box_structure, box_str_to_uv, render_1);
     }
 
-    if (rendering_local_points_.size() != 0)
+    if (bbox_tracked_points_.size() != 0)
     {
-        const Vector3d& center = tracker_pose.segment<3>(6);
-        Quaterniond quaternion(tracker_pose(9), tracker_pose(10), tracker_pose(11), tracker_pose(12));
-        Matrix3d rotation = quaternion.toRotationMatrix();
-
-        MatrixXd tracked_points = (rotation * rendering_local_points_).colwise() + center;
-        auto box_str_to_uv = str_to_uv(tracked_points, rendering_points_mapping_);
+        auto box_str_to_uv = str_to_uv(bbox_tracked_points_, bbox_local_points_mapping_);
         draw_points(box_structure, box_str_to_uv, render_0);
     }
 
