@@ -195,6 +195,10 @@ private:
 
     const std::string output_pose_reference_frame_;
 
+    Eigen::MatrixXd rendering_local_points_;
+
+    std::unordered_map<int, std::string> rendering_points_mapping_;
+
     /* Renderers initialization status and related. */
 
     bool rendering_initialized_ = false;

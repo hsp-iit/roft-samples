@@ -775,80 +775,109 @@ std::pair<cv::Mat, cv::Mat> ROFTFilter::render_pose_as_mesh(const cv::Mat& rgb_f
 }
 
 
-std::pair<cv::Mat, cv::Mat> ROFTFilter::render_pose_as_bounding_box(const cv::Mat& rgb_frame, const Eigen::VectorXd& tracker_pose, const Eigen::VectorXd& pose_measurement, const Eigen::MatrixXd& bounding_box_points)
+std::pair<cv::Mat, cv::Mat> ROFTFilter::render_pose_as_bounding_box(const cv::Mat& rgb_frame, const Eigen::VectorXd& tracker_pose, const Eigen::VectorXd& pose_measurement, const Eigen::MatrixXd& measured_points)
 {
+    /* Utilities. */
+    auto index_to_str = [](const Eigen::MatrixXd& local_points) -> std::unordered_map<int, std::string>
+    {
+        std::unordered_map<int, std::string> i_to_str;
+        for (std::size_t i = 0; i < local_points.cols(); i++)
+        {
+            const double& x = local_points.col(i)(0);
+            const double& y = local_points.col(i)(1);
+            const double& z = local_points.col(i)(2);
+
+            if (x > 0 && y > 0 && z > 0)
+                i_to_str[i] = "top_right_front";
+            else if (x > 0 && y > 0 && z < 0)
+                i_to_str[i] = "top_right_back";
+            else if (x > 0 && y < 0 && z > 0)
+                i_to_str[i] = "top_left_front";
+            else if (x > 0 && y < 0 && z < 0)
+                i_to_str[i] = "top_left_back";
+            else if (x < 0 && y > 0 && z > 0)
+                i_to_str[i] = "bottom_right_front";
+            else if (x < 0 && y > 0 && z < 0)
+                i_to_str[i] = "bottom_right_back";
+            else if (x < 0 && y < 0 && z > 0)
+                i_to_str[i] = "bottom_left_front";
+            else if (x < 0 && y < 0 && z < 0)
+                i_to_str[i] = "bottom_left_back";
+        }
+
+        return i_to_str;
+    };
+
+    auto str_to_uv = [this] (const Eigen::MatrixXd& global_points, const std::unordered_map<int, std::string>& i_to_str) -> std::unordered_map<std::string, cv::Point>
+    {
+
+        std::unordered_map<std::string, cv::Point> str_to_point;
+
+        for (std::size_t i = 0; i < global_points.cols(); i++)
+        {
+            const VectorXd& point = global_points.col(i);
+            const unsigned int u = camera_parameters_.cx() + camera_parameters_.fx() * point(0) / point(2);
+            const unsigned int v = camera_parameters_.cy() + camera_parameters_.fy() * point(1) / point(2);
+            str_to_point[i_to_str.at(i)] = cv::Point(u, v);
+        }
+
+        return str_to_point;
+    };
+
+    auto draw_points = [] (const std::unordered_map<std::string, std::vector<std::string>>& structure, const std::unordered_map<std::string, cv::Point>& mapping, cv::Mat& output)
+    {
+        for (const auto& item : structure)
+        {
+            const std::string& parent = item.first;
+            cv::circle(output, mapping.at(parent), 5, cv::Scalar(255, 150, 0), cv::FILLED);
+
+            const std::vector<std::string>& children = item.second;
+            for (const auto& child : children)
+                cv::line(output, mapping.at(parent), mapping.at(child), cv::Scalar(255, 150, 0), 1);
+        }
+    };
+
+    std::unordered_map<std::string, std::vector<std::string>> box_structure
+    {
+        {"top_right_front", {"bottom_right_front", "top_left_front", "top_right_back", "top_left_back"}},
+        {"top_left_back", {"bottom_left_back", "top_left_front", "top_right_back"}},
+        {"top_right_back", {"bottom_right_back"}},
+        {"top_left_front", {"bottom_left_front"}},
+        {"bottom_right_front", {"bottom_left_front", "bottom_right_back"}},
+        {"bottom_left_back", {"bottom_left_front", "bottom_right_back"}},
+        {"bottom_right_back", {}},
+        {"bottom_left_front", {}}
+    };
+
+    /* */
     cv::Mat render_0;
     cv::Mat render_1;
 
     render_0 = rgb_frame.clone();
 
-    if (bounding_box_points.size() != 0)
+    if (measured_points.size() != 0)
     {
         render_1 = rgb_frame.clone();
-        /* Find points placement. */
-        MatrixXd points_offset = bounding_box_points.colwise() + (-pose_measurement.segment<3>(6));
+
+        const Vector3d& center = pose_measurement.segment<3>(6);
         Quaterniond quaternion(pose_measurement(9), pose_measurement(10), pose_measurement(11), pose_measurement(12));
         Matrix3d rotation = quaternion.toRotationMatrix();
-        MatrixXd points_object = rotation.transpose() * points_offset;
 
-        std::unordered_map<int, std::string> mapping;
-        for (std::size_t i = 0; i < points_object.cols(); i++)
-        {
-            const double& x = points_object.col(i)(0);
-            const double& y = points_object.col(i)(1);
-            const double& z = points_object.col(i)(2);
+        rendering_local_points_ = rotation.transpose() * (measured_points.colwise() + (-center));
+        rendering_points_mapping_ = index_to_str(rendering_local_points_);
+        auto box_str_to_uv = str_to_uv(measured_points, rendering_points_mapping_);
+        draw_points(box_structure, box_str_to_uv, render_1);
+    }
 
-            if (z > 0)
-            {
-                if (x >0)
-                {
-                    if (y > 0)
-                        mapping[i] = "top_right_back";
-                    else
-                        mapping[i] = "top_right_front";
-                }
-                else
-                {
-                    if (y > 0)
-                        mapping[i] = "top_left_back";
-                    else
-                        mapping[i] = "top_left_front";
-                }
-            }
-            else
-            {
-                if (x >0)
-                {
-                    if (y > 0)
-                        mapping[i] = "bottom_right_back";
-                    else
-                        mapping[i] = "bottom_right_front";
-                }
-                else
-                {
-                    if (y > 0)
-                        mapping[i] = "bottom_left_back";
-                    else
-                        mapping[i] = "bottom_left_front";
-                }
-            }
-        }
+    if (rendering_local_points_.size() != 0)
+    {
+        const Vector3d& center = tracker_pose.segment<3>(6);
+        Quaterniond quaternion(tracker_pose(9), tracker_pose(10), tracker_pose(11), tracker_pose(12));
+        Matrix3d rotation = quaternion.toRotationMatrix();
 
-        std::unordered_map<std::string, cv::Point> vertex_coordinates;
-        /* Draw vertices. */
-        for (std::size_t i = 0; i < bounding_box_points.cols(); i++)
-        {
-            const VectorXd& point = bounding_box_points.col(i);
-            const unsigned int u = camera_parameters_.cx() + camera_parameters_.fx() * point(0) / point(2);
-            const unsigned int v = camera_parameters_.cy() + camera_parameters_.fy() * point(1) / point(2);
-
-            cv::circle(render_1, cv::Point(u, v), 5, cv::Scalar(255, 150, 0), cv::FILLED);
-
-            vertex_coordinates[mapping.at(i)] = cv::Point(u, v);
-        }
-
-        /* Draw lines. */
-        cv::line(render_1, vertex_coordinates["top_right_front"], vertex_coordinates["top_left_front"], cv::Scalar(255, 150, 0), 3);
+        MatrixXd tracked_points = (rotation * rendering_local_points_).colwise() + center;
+        auto box_str_to_uv = str_to_uv(tracked_points, rendering_points_mapping_);
+        draw_points(box_structure, box_str_to_uv, render_0);
     }
 
     return std::make_pair(render_0, render_1);
