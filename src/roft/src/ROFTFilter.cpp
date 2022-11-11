@@ -857,13 +857,13 @@ std::pair<cv::Mat, cv::Mat> ROFTFilter::render_pose_as_bounding_box(const cv::Ma
 
             const std::vector<std::string>& children = item.second;
             for (const auto& child : children)
-                cv::line(output, mapping.at(parent), mapping.at(child), color, 1);
+                cv::line(output, mapping.at(parent), mapping.at(child), color, 1.5);
         }
     };
 
     std::unordered_map<std::string, std::vector<std::string>> box_structure
     {
-        {"top_right_front", {"bottom_right_front", "top_left_front", "top_right_back", "top_left_back"}},
+        {"top_right_front", {"bottom_right_front", "top_left_front", "top_right_back"}},//, "top_left_back"}},
         {"top_left_back", {"bottom_left_back", "top_left_front", "top_right_back"}},
         {"top_right_back", {"bottom_right_back"}},
         {"top_left_front", {"bottom_left_front"}},
