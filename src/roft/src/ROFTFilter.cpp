@@ -848,16 +848,16 @@ std::pair<cv::Mat, cv::Mat> ROFTFilter::render_pose_as_bounding_box(const cv::Ma
         return str_to_point;
     };
 
-    auto draw_points = [] (const std::unordered_map<std::string, std::vector<std::string>>& structure, const std::unordered_map<std::string, cv::Point>& mapping, cv::Mat& output)
+    auto draw_points = [] (const std::unordered_map<std::string, std::vector<std::string>>& structure, const std::unordered_map<std::string, cv::Point>& mapping, cv::Scalar& color, cv::Mat& output)
     {
         for (const auto& item : structure)
         {
             const std::string& parent = item.first;
-            cv::circle(output, mapping.at(parent), 5, cv::Scalar(255, 150, 0), cv::FILLED);
+            cv::circle(output, mapping.at(parent), 5, color, cv::FILLED);
 
             const std::vector<std::string>& children = item.second;
             for (const auto& child : children)
-                cv::line(output, mapping.at(parent), mapping.at(child), cv::Scalar(255, 150, 0), 1);
+                cv::line(output, mapping.at(parent), mapping.at(child), color, 1);
         }
     };
 
@@ -883,15 +883,17 @@ std::pair<cv::Mat, cv::Mat> ROFTFilter::render_pose_as_bounding_box(const cv::Ma
     {
         render_1 = rgb_frame.clone();
 
+        auto color = cv::Scalar(0, 0, 255);
         bbox_local_points_mapping_ = index_to_str(bbox_local_points_);
         auto box_str_to_uv = str_to_uv(measured_points, bbox_local_points_mapping_);
-        draw_points(box_structure, box_str_to_uv, render_1);
+        draw_points(box_structure, box_str_to_uv, color, render_1);
     }
 
     if (bbox_tracked_points_.size() != 0)
     {
+        auto color = cv::Scalar(0, 255, 0);
         auto box_str_to_uv = str_to_uv(bbox_tracked_points_, bbox_local_points_mapping_);
-        draw_points(box_structure, box_str_to_uv, render_0);
+        draw_points(box_structure, box_str_to_uv, color, render_0);
     }
 
     return std::make_pair(render_0, render_1);
