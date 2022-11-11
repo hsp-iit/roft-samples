@@ -491,6 +491,7 @@ void ROFTFilter::filtering_step()
     p_mean.segment<3>(9) = angle_axis.axis();
     p_mean(12) = angle_axis.angle();
 
+    MatrixXd bbox_tracked_points = bbox_tracked_points_;
     if (output_pose_reference_frame_ == "root")
     {
         /* Transform the output pose in the root frame,
@@ -508,15 +509,28 @@ void ROFTFilter::filtering_step()
         AngleAxisd angle_axis_root(object_root_pose.rotation());
         p_mean.segment<3>(9) = angle_axis_root.axis();
         p_mean(12) = angle_axis_root.angle();
+
+        if (bbox_tracked_points.size() != 0)
+            bbox_tracked_points = camera_pose * bbox_tracked_points.colwise().homogeneous();
     }
 
     VectorXd v_mean = v_corr_belief_.mean();
 
     if (is_probe("output_state"))
     {
-        VectorXd state(13);
+        std::size_t total_size = 13 + bbox_tracked_points.size();
+
+        VectorXd state(total_size);
         state.head<7>() = p_mean.tail<7>();
         state.tail<6>() = p_mean.head<6>();
+
+        if (bbox_tracked_points.size() != 0)
+            for (std::size_t i = 0; i < bbox_tracked_points.cols(); i++)
+            {
+                state(13 + i * 3 + 0) = bbox_tracked_points.col(i)(0);
+                state(13 + i * 3 + 1) = bbox_tracked_points.col(i)(1);
+                state(13 + i * 3 + 2) = bbox_tracked_points.col(i)(2);
+            }
 
         get_probe("output_state").set_data(state);
     }
