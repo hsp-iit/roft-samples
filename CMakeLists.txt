@@ -37,7 +37,7 @@ if (BUILD_REALSENSE)
    add_subdirectory(src/rs)
 endif()
 
-if (BUILD_HANDOVER)
+if (BUILD_ICUB_HANDOVER)
   add_subdirectory(src/grasp-data)
   add_subdirectory(src/grasp-viewer)
   add_subdirectory(src/handover)
