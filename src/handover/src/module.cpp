@@ -973,7 +973,6 @@ bool Module::execute_grasp(const Pose& pose, const MatrixXd& object_points, cons
             Eigen::Vector3d y_axis = pose.rotation().col(1);
             if (abs(std::acos(y_axis.dot(Eigen::Vector3d::UnitZ()))) < M_PI / 2.0)
                 rotation_offset = rotation_offset * Eigen::AngleAxisd(M_PI, Eigen::Vector3d::UnitX()).toRotationMatrix();
-
             Eigen::Matrix3d rot_offset_0 = Eigen::AngleAxisd(M_PI / 2.0, Eigen::Vector3d::UnitX()).toRotationMatrix();
             Eigen::Matrix3d rot_offset_1 = Eigen::AngleAxisd(M_PI / 2.0, Eigen::Vector3d::UnitZ()).toRotationMatrix();
             rotation_offset = rotation_offset * rot_offset_0 * rot_offset_1;
@@ -990,11 +989,10 @@ bool Module::execute_grasp(const Pose& pose, const MatrixXd& object_points, cons
             object_sizes(1) = tmp_object_sizes(1);
             object_sizes(2) = tmp_object_sizes(0);
 
-           /* Make sure the rotation offset transforms the reference frame such that the z axis points upward. */
+            /* Make sure the rotation offset transforms the reference frame such that the z axis points upward. */
             Eigen::Vector3d x_axis = pose.rotation().col(0);
             if (abs(std::acos(x_axis.dot(Eigen::Vector3d::UnitZ()))) > M_PI / 2.0)
                 rotation_offset = rotation_offset * Eigen::AngleAxisd(M_PI, Eigen::Vector3d::UnitY()).toRotationMatrix();
-
             rotation_offset = rotation_offset * Eigen::AngleAxisd(M_PI / 2.0, Eigen::Vector3d::UnitY()).toRotationMatrix();
         }
 
