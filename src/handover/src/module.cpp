@@ -962,21 +962,40 @@ bool Module::execute_grasp(const Pose& pose, const MatrixXd& object_points, cons
         object_offsets.setZero();
         rotation_offset.setIdentity();
 
+        /* FIXME: These transformations might be unified at some point. */
         if (object_name_ != "unknown")
         {
-            // Here we are considering precomputed object properties assuming NVidia NVDU DOPE reference frames
+            /* Here we are considering precomputed object properties assuming NVidia NVDU DOPE reference frames. */
             object_sizes = object_sizes_.at(object_name_);
             object_offsets = object_offsets_.at(object_name_);
 
-            // Take into account object pointing downwards
+            /* Make sure the rotation offset transforms the reference frame such that the z axis points upward. */
             Eigen::Vector3d y_axis = pose.rotation().col(1);
             if (abs(std::acos(y_axis.dot(Eigen::Vector3d::UnitZ()))) < M_PI / 2.0)
                 rotation_offset = rotation_offset * Eigen::AngleAxisd(M_PI, Eigen::Vector3d::UnitX()).toRotationMatrix();
 
-            // Make sure the rotation offset transform the reference frame such that the z axis points upward
             Eigen::Matrix3d rot_offset_0 = Eigen::AngleAxisd(M_PI / 2.0, Eigen::Vector3d::UnitX()).toRotationMatrix();
             Eigen::Matrix3d rot_offset_1 = Eigen::AngleAxisd(M_PI / 2.0, Eigen::Vector3d::UnitZ()).toRotationMatrix();
             rotation_offset = rotation_offset * rot_offset_0 * rot_offset_1;
+        }
+        else
+        {
+            /* If the object is unknown we rely on the oriented bounding box points to evaluate object properties. */
+
+            /* Evaluate object sizes with x, y and z axis in descending order. */
+            VectorXd tmp_object_sizes = evaluate_object_sizes(pose, object_points);
+
+            /* Re-order the sizes so that they adhere to the common standards in the cardinal points grasp code. */
+            object_sizes(0) = tmp_object_sizes(2);
+            object_sizes(1) = tmp_object_sizes(1);
+            object_sizes(2) = tmp_object_sizes(0);
+
+           /* Make sure the rotation offset transforms the reference frame such that the z axis points upward. */
+            Eigen::Vector3d x_axis = pose.rotation().col(0);
+            if (abs(std::acos(x_axis.dot(Eigen::Vector3d::UnitZ()))) > M_PI / 2.0)
+                rotation_offset = rotation_offset * Eigen::AngleAxisd(M_PI, Eigen::Vector3d::UnitY()).toRotationMatrix();
+
+            rotation_offset = rotation_offset * Eigen::AngleAxisd(M_PI / 2.0, Eigen::Vector3d::UnitY()).toRotationMatrix();
         }
 
         if (cart_left_)
@@ -1347,6 +1366,44 @@ bool Module::execute_grasp(const Pose& pose, const MatrixXd& object_points, cons
     }
 
     return true;
+}
+
+
+Vector3d Module::evaluate_object_sizes(const Eigen::Transform<double, 3, Eigen::Affine>& pose, const Eigen::MatrixXd& points)
+{
+    MatrixXd local_points = pose.rotation().transpose() * (points.colwise() + (-pose.translation()));
+    std::unordered_map<std::string, VectorXd> mapping;
+
+    for (std::size_t i = 0; i < local_points.cols(); i++)
+    {
+        const double& x = local_points.col(i)(0);
+        const double& y = local_points.col(i)(1);
+        const double& z = local_points.col(i)(2);
+
+        if (x > 0 && y > 0 && z > 0)
+            mapping["top_right_front"] = local_points.col(i);
+        else if (x > 0 && y > 0 && z < 0)
+            mapping["top_right_back"] = local_points.col(i);
+        else if (x > 0 && y < 0 && z > 0)
+            mapping["top_left_front"] = local_points.col(i);
+        else if (x > 0 && y < 0 && z < 0)
+            mapping["top_left_back"] = local_points.col(i);
+        else if (x < 0 && y > 0 && z > 0)
+            mapping["bottom_right_front"] = local_points.col(i);
+        else if (x < 0 && y > 0 && z < 0)
+            mapping["bottom_right_back"] = local_points.col(i);
+        else if (x < 0 && y < 0 && z > 0)
+            mapping["bottom_left_front"] = local_points.col(i);
+        else if (x < 0 && y < 0 && z < 0)
+            mapping["bottom_left_back"] = local_points.col(i);
+    }
+
+    VectorXd sizes(3);
+    sizes[0] = (mapping["top_right_front"] - mapping["bottom_right_front"]).norm();
+    sizes[1] = (mapping["top_right_front"] - mapping["top_left_front"]).norm();
+    sizes[2] = (mapping["top_right_front"] - mapping["top_right_back"]).norm();
+
+    return sizes;
 }
 
 

@@ -94,6 +94,11 @@ private:
     bool execute_grasp(const Eigen::Transform<double, 3, Eigen::Affine>& pose, const Eigen::MatrixXd& object_points, const Eigen::Transform<double, 3, Eigen::Affine>& feedback, const bool& valid_feedback);
 
     /**
+     * Object sizes evaluator given object bounding box points and pose.
+     */
+    Eigen::Vector3d evaluate_object_sizes(const Eigen::Transform<double, 3, Eigen::Affine>& pose, const Eigen::MatrixXd& points);
+
+    /**
      * Face expression handling.
      */
     void set_face_expression(const std::string& type);
