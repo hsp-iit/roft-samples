@@ -139,6 +139,9 @@ bool Module::configure(yarp::os::ResourceFinder& rf)
         return false;
     }
 
+    const Bottle rf_object = rf.findGroup("OBJECT");
+    object_name_ = rf_object.check("name", Value("unknown")).asString();
+
     const Bottle rf_parts = rf.findGroup("PARTS");
     bool enable_part_left = rf_parts.check("left", Value(false)).asBool();
     bool enable_part_right = rf_parts.check("right", Value(false)).asBool();

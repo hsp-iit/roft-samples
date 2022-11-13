@@ -198,7 +198,7 @@ private:
     /**
      * Objects name.
      */
-    std::string object_name_ = "006_mustard_bottle";
+    std::string object_name_;
 
     /**
      * Objects short name to long name mapping.
