@@ -228,6 +228,30 @@ bool Module::configure(yarp::os::ResourceFinder& rf)
     objects_map_["o004"] = "004_sugar_box";
     objects_map_["o006"] = "006_mustard_bottle";
 
+    /* Object sizes. */
+    object_sizes_["003_cracker_box"] = Eigen::Vector3d::Zero();
+    object_sizes_.at("003_cracker_box")(0) = 0.04; // it should be 0.0718, pretending it is thinner than real
+    object_sizes_.at("003_cracker_box")(1) = 0.1640;
+    object_sizes_.at("003_cracker_box")(2) = 0.2134;
+
+    object_sizes_["004_sugar_box"] = Eigen::Vector3d::Zero();
+    object_sizes_.at("004_sugar_box")(0) = 0.0451;
+    object_sizes_.at("004_sugar_box")(1) = 0.0927;
+    object_sizes_.at("004_sugar_box")(2) = 0.1763;
+
+    object_sizes_["006_mustard_bottle"] = Eigen::Vector3d::Zero();
+    object_sizes_.at("006_mustard_bottle")(0) = 0.0582;
+    object_sizes_.at("006_mustard_bottle")(1) = 0.0960;
+    object_sizes_.at("006_mustard_bottle")(2) = 0.1913;
+
+    /* Object offsets. */
+    // offset due to non-centered frames in object meshes
+    // valid for DOPE meshes only, written in DOPE reference frame
+    object_offsets_["003_cracker_box"] = Eigen::Vector3d::Zero();
+    object_offsets_["004_sugar_box"] = Eigen::Vector3d::Zero();
+    object_offsets_["006_mustard_bottle"] = Eigen::Vector3d::Zero();
+    object_offsets_.at("006_mustard_bottle")(1) = 0.005;
+
     /* Configure iCub gaze controller. */
     gaze_ = std::make_shared<iCubGaze>(robot, log_name_, gaze_neck_time_trk, gaze_eyes_time_trk, gaze_neck_time_home, gaze_eyes_time_home);
 
@@ -932,16 +956,44 @@ bool Module::execute_grasp(const Pose& pose, const MatrixXd& object_points, cons
         std::vector<rankable_candidate> candidates_r;
         int context_l;
         int context_r;
+        Vector3d object_sizes;
+        Vector3d object_offsets;
+        Eigen::Matrix3d rotation_offset;
+        object_offsets.setZero();
+        rotation_offset.setIdentity();
+
+        if (object_name_ != "unknown")
+        {
+            // Here we are considering precomputed object properties assuming NVidia NVDU DOPE reference frames
+            object_sizes = object_sizes_.at(object_name_);
+            object_offsets = object_offsets_.at(object_name_);
+
+            // Take into account object pointing downwards
+            Eigen::Vector3d y_axis = pose.rotation().col(1);
+            if (abs(std::acos(y_axis.dot(Eigen::Vector3d::UnitZ()))) < M_PI / 2.0)
+                rotation_offset = rotation_offset * Eigen::AngleAxisd(M_PI, Eigen::Vector3d::UnitX()).toRotationMatrix();
+
+            // Make sure the rotation offset transform the reference frame such that the z axis points upward
+            Eigen::Matrix3d rot_offset_0 = Eigen::AngleAxisd(M_PI / 2.0, Eigen::Vector3d::UnitX()).toRotationMatrix();
+            Eigen::Matrix3d rot_offset_1 = Eigen::AngleAxisd(M_PI / 2.0, Eigen::Vector3d::UnitZ()).toRotationMatrix();
+            rotation_offset = rotation_offset * rot_offset_0 * rot_offset_1;
+        }
 
         if (cart_left_)
         {
-            auto grasper = std::make_unique<CardinalPointsGrasp>(object_name_, "left", pregrasp_hand_joints_);
+            auto grasper = std::make_unique<CardinalPointsGrasp>("left", pregrasp_hand_joints_);
+            grasper->setObjectSizes(object_sizes);
+            grasper->setObjectOffsets(object_offsets);
+            grasper->setReferenceFrameOffset(rotation_offset);
             std::tie(candidates_l, context_l) = grasper->getCandidates(pose, &(cart_left_->controller()));
         }
 
         if (cart_right_)
         {
-            auto grasper = std::make_unique<CardinalPointsGrasp>(object_name_, "right", pregrasp_hand_joints_);
+            auto grasper = std::make_unique<CardinalPointsGrasp>("right", pregrasp_hand_joints_);
+            grasper->setObjectSizes(object_sizes);
+            grasper->setObjectOffsets(object_offsets);
+            grasper->setReferenceFrameOffset(rotation_offset);
             std::tie(candidates_r, context_r) = grasper->getCandidates(pose, &(cart_right_->controller()));
         }
 

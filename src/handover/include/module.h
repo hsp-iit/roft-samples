@@ -273,6 +273,10 @@ private:
 
     const double feedback_wait_threshold_ = 40.0;
 
+    std::unordered_map<std::string, Eigen::VectorXd> object_sizes_;
+
+    std::unordered_map<std::string, Eigen::VectorXd> object_offsets_;
+
     /**
      * Module state.
      */
