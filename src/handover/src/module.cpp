@@ -464,7 +464,7 @@ bool Module::updateModule()
             state_ = State::IdleNoGaze;
         }
 
-        if(!execute_grasp(grasp_object_pose_, pose, valid_pose))
+        if(!execute_grasp(grasp_object_pose_, grasp_object_points_, pose, valid_pose))
         {
             yInfo() << "[Grasp -> WaitForFeedback]";
 
@@ -495,6 +495,7 @@ bool Module::updateModule()
                 if (is_pose_grasp_safe(pose))
                 {
                     grasp_object_pose_ = pose;
+                    grasp_object_points_ = points;
                     grasp_state_ = GraspState::Evaluation;
 
                     yInfo() << "[Tracking -> Grasp]";
@@ -873,7 +874,7 @@ void Module::go_home_hand()
 }
 
 
-bool Module::execute_grasp(const Pose& pose, const Pose& feedback, const bool& valid_feedback)
+bool Module::execute_grasp(const Pose& pose, const MatrixXd& object_points, const Pose& feedback, const bool& valid_feedback)
 {
 
     bool interruptible = !

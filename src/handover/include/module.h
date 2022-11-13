@@ -91,7 +91,7 @@ private:
     /**
      * Grasping.
      */
-    bool execute_grasp(const Eigen::Transform<double, 3, Eigen::Affine>& pose, const Eigen::Transform<double, 3, Eigen::Affine>& feedback, const bool& valid_feedback);
+    bool execute_grasp(const Eigen::Transform<double, 3, Eigen::Affine>& pose, const Eigen::MatrixXd& object_points, const Eigen::Transform<double, 3, Eigen::Affine>& feedback, const bool& valid_feedback);
 
     /**
      * Face expression handling.
@@ -213,6 +213,8 @@ private:
     Eigen::Transform<double, 3, Eigen::Affine> last_object_pose_;
 
     Eigen::Transform<double, 3, Eigen::Affine> grasp_object_pose_;
+
+    Eigen::MatrixXd grasp_object_points_;
 
     Eigen::Vector3d last_object_velocity_;
 
