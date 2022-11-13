@@ -1,0 +1,51 @@
+<application>
+    <name>ROFT Handover HyperPCR with iCub</name>
+
+    <module>
+        <name>roft-samples-handover</name>
+        <node>localhost</node>
+        <parameters>--OBJECT::name unknown</parameters>
+    </module>
+
+    <module>
+        <name>roft-samples-grasp-viewer</name>
+        <node>localhost</node>
+    </module>
+
+    <connection>
+        <from>/roft-samples-handover/segmentation/rpc:o</from>
+        <to>/detectron2/rpc:i</to>
+        <protocol>fast_tcp</protocol>
+    </connection>
+
+    <connection>
+        <from>/roft-samples-handover/pose/rpc:o</from>
+        <to>/dope/rpc:i</to>
+        <protocol>fast_tcp</protocol>
+    </connection>
+
+    <connection>
+        <from>/roft-samples-handover/tracker/rpc:o</from>
+        <to>/roft-samples-tracker/rpc:i</to>
+        <protocol>fast_tcp</protocol>
+    </connection>
+
+    <connection>
+        <from>/roft-samples-tracker/probe/state:o</from>
+        <to>/roft-samples-handover/tracker/state:i</to>
+        <protocol>fast_tcp</protocol>
+    </connection>
+
+    <connection>
+      <from>/roft-samples-handover/face_expression:o</from>
+      <to>/icub/face/emotions/in</to>
+      <protocol>fast_tcp</protocol>
+    </connection>
+
+    <connection>
+      <from>/roft-samples-handover/grasp-data:o</from>
+      <to>/roft-samples-grasp-viewer/grasp-data:i</to>
+      <protocol>unix_stream</protocol>
+    </connection>
+
+</application>
