@@ -294,36 +294,46 @@ public:
         }
 
         // generate top-grasp candidates
-        Eigen::Vector3d top_eigen = center_eigen + rotation * Eigen::Vector3d::UnitZ() * bz;
-        yarp::sig::Vector top(3);
-        yarp::eigen::toEigen(top) = top_eigen;
-        for (size_t i = 0; i < side_points.size(); i++) {
-            // prune by comparing the pre-grasp aperture with the SQ relative size
-            if (((i & 0x01) && (2. * by < .5 * pregrasp_aperture)) ||
-                (!(i & 0x01) && (2. * bx < .5 * pregrasp_aperture))) {
+        const std::vector<Eigen::Vector3d> vertical_points{Eigen::Vector3d(0., 0., bz), Eigen::Vector3d(0., 0., -bz)};
 
-                Eigen::Vector3d dir_eigen = rotation * side_points.at(i);
-                dir_eigen.normalize();
-                yarp::sig::Vector axis_x(3);
-                yarp::eigen::toEigen(axis_x) = dir_eigen;
+        for (size_t j = 0; j < vertical_points.size(); j++)
+        {
+            Eigen::Vector3d top_eigen = center_eigen + rotation * vertical_points[j];
+            yarp::sig::Vector top(3);
+            yarp::eigen::toEigen(top) = top_eigen;
 
-                Eigen::Vector3d axis_z_eigen = (hand == "right" ? -1 : 1) * rotation.col(2);
+            int sign = 1;
+            if (vertical_points[j](2) < 0)
+                sign = -1;
 
-                yarp::sig::Vector axis_z(3);
-                yarp::eigen::toEigen(axis_z) = axis_z_eigen;
-                const auto axis_y = yarp::math::cross(axis_z, axis_x);
-                const auto candidate = composeCandidate(axis_x, axis_y, axis_z,
-                                                        top + axis_y * dist_center_index_middle, {0., 0., 1.});
-                // account for size limitations
-                if (candidate(2, 3) - fingers_max_length > center[2] - bz) {
-                    auto cost = evaluateCandidate(candidate, iarm);
-                    if (cost != std::numeric_limits<double>::infinity()) {
-                        // penalize candidate further from COG
-                        if (bz == max_b) {
-                            cost += 5. / 180.;
+            for (size_t i = 0; i < side_points.size(); i++) {
+                // prune by comparing the pre-grasp aperture with the SQ relative size
+                if (((i & 0x01) && (2. * by < .5 * pregrasp_aperture)) ||
+                    (!(i & 0x01) && (2. * bx < .5 * pregrasp_aperture))) {
+
+                    Eigen::Vector3d dir_eigen = rotation * side_points.at(i);
+                    dir_eigen.normalize();
+                    yarp::sig::Vector axis_x(3);
+                    yarp::eigen::toEigen(axis_x) = dir_eigen;
+
+                    Eigen::Vector3d axis_z_eigen = (hand == "right" ? -1 : 1) * rotation.col(2) * sign;
+
+                    yarp::sig::Vector axis_z(3);
+                    yarp::eigen::toEigen(axis_z) = axis_z_eigen;
+                    const auto axis_y = yarp::math::cross(axis_z, axis_x);
+                    const auto candidate = composeCandidate(axis_x, axis_y, axis_z,
+                                                            top + axis_y * dist_center_index_middle, {0., 0., 1.});
+                    // account for size limitations
+                    // if (candidate(2, 3) - fingers_max_length > center[2] - bz) {
+                        auto cost = evaluateCandidate(candidate, iarm);
+                        if (cost != std::numeric_limits<double>::infinity()) {
+                            // penalize candidate further from COG
+                            if (bz == max_b) {
+                                cost += 5. / 180.;
+                            }
+                            candidates.push_back(std::make_tuple(hand, cost, candidate, center));
                         }
-                        candidates.push_back(std::make_tuple(hand, cost, candidate, center));
-                    }
+                    // }
                 }
             }
         }
