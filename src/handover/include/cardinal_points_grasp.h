@@ -72,9 +72,11 @@ namespace cardinal_points_grasp {
 
 /******************************************************************************/
 class CardinalPointsGrasp {
-    const std::string object_name;
     const std::string hand;
     Eigen::VectorXd pregrasp_fingers_posture;
+    Eigen::VectorXd object_sizes;
+    Eigen::VectorXd object_offsets;
+    Eigen::MatrixXd reference_frame_offset;
 
     double pregrasp_aperture{0.};
     double hand_half_height{0.};
@@ -82,9 +84,6 @@ class CardinalPointsGrasp {
     double dist_center_index_middle{0.};
     double approach_min_distance{0.};
     yarp::sig::Matrix approach;
-
-    std::unordered_map<std::string, Eigen::VectorXd> offsets;
-    std::unordered_map<std::string, Eigen::VectorXd> sizes;
 
     std::vector<std::unique_ptr<iCub::iKin::iCubFinger>> fingers;
 
@@ -129,8 +128,9 @@ public:
     CardinalPointsGrasp() = delete;
 
     /**************************************************************************/
-    CardinalPointsGrasp(const std::string& object_name_, const std::string& hand_, const Eigen::VectorXd& pregrasp_fingers_posture_) :
-        hand(hand_), pregrasp_fingers_posture(pregrasp_fingers_posture_), object_name(object_name_) {
+    CardinalPointsGrasp(const std::string& hand_, const Eigen::VectorXd& pregrasp_fingers_posture_) :
+        hand(hand_), pregrasp_fingers_posture(pregrasp_fingers_posture_)
+    {
         // create fingers and set them up in the pregrasp posture
         std::vector<std::string> fingers_names{"thumb", "index", "middle", "ring", "little"};
         for (auto& name:fingers_names) {
@@ -195,32 +195,24 @@ public:
 
         // compute the approach frame wrt the canonical hand-centered frame
         approach = yarp::math::axis2dcm({0., 1., 0., sector_beg + pregrasp_aperture_angle * (hand == "right" ? -.3 : .3)});
+    }
 
-        // offset due to non-centered frames in object meshes
-        // valid for DOPE meshes only, written in DOPE reference frame
-        offsets["003_cracker_box"] = Eigen::Vector3d::Zero();
-        offsets["004_sugar_box"] = Eigen::Vector3d::Zero();
-        offsets["006_mustard_bottle"] = Eigen::Vector3d::Zero();
-        offsets.at("006_mustard_bottle")(1) = 0.005;
+    /**************************************************************************/
+    void setObjectSizes(const Eigen::VectorXd& vector)
+    {
+        object_sizes = vector;
+    }
 
-        // sizes of objects
-        sizes["003_cracker_box"] = Eigen::Vector3d::Zero();
-        // sizes.at("003_cracker_box")(0) = 0.0718;
-        // pretend that this is thinner than real
-        sizes.at("003_cracker_box")(0) = 0.04;
-        //
-        sizes.at("003_cracker_box")(1) = 0.1640;
-        sizes.at("003_cracker_box")(2) = 0.2134;
+    /**************************************************************************/
+    void setObjectOffsets(const Eigen::VectorXd& vector)
+    {
+        object_offsets = vector;
+    }
 
-        sizes["004_sugar_box"] = Eigen::Vector3d::Zero();
-        sizes.at("004_sugar_box")(0) = 0.0451;
-        sizes.at("004_sugar_box")(1) = 0.0927;
-        sizes.at("004_sugar_box")(2) = 0.1763;
-
-        sizes["006_mustard_bottle"] = Eigen::Vector3d::Zero();
-        sizes.at("006_mustard_bottle")(0) = 0.0582;
-        sizes.at("006_mustard_bottle")(1) = 0.0960;
-        sizes.at("006_mustard_bottle")(2) = 0.1913;
+    /**************************************************************************/
+    void setReferenceFrameOffset(const Eigen::MatrixXd& matrix)
+    {
+        reference_frame_offset = matrix;
     }
 
     /**************************************************************************/
@@ -251,26 +243,19 @@ public:
         yarp::sig::Vector dof;
 
         // retrieve object parameters
-        const auto bx = sizes.at(object_name)(0) / 2;
-        const auto by = sizes.at(object_name)(1) / 2;
-        const auto bz = sizes.at(object_name)(2) / 2;
+        const auto bx = object_sizes(0) / 2;
+        const auto by = object_sizes(1) / 2;
+        const auto bz = object_sizes(2) / 2;
         const auto max_b = std::max(bx, std::max(by, bz));
 
         Eigen::Matrix3d rotation = pose.rotation();
 
-        Eigen::Vector3d center_eigen = pose.translation() + rotation * offsets.at(object_name);
+        Eigen::Vector3d center_eigen = pose.translation() + rotation * object_offsets;
         yarp::sig::Vector center(3);
         yarp::eigen::toEigen(center) = center_eigen;
 
-        // Take into account object pointing downwards (according to DOPE reference frame)
-        Eigen::Vector3d y_axis = rotation.col(1);
-        if (abs(std::acos(y_axis.dot(Eigen::Vector3d::UnitZ()))) < M_PI / 2.0)
-            rotation = rotation * Eigen::AngleAxisd(M_PI, Eigen::Vector3d::UnitX()).toRotationMatrix();
-
-        // Take into account DOPE reference frame
-        Eigen::Matrix3d rot_offset_0 = Eigen::AngleAxisd(M_PI / 2.0, Eigen::Vector3d::UnitX()).toRotationMatrix();
-        Eigen::Matrix3d rot_offset_1 = Eigen::AngleAxisd(M_PI / 2.0, Eigen::Vector3d::UnitZ()).toRotationMatrix();
-        rotation = rotation * rot_offset_0 * rot_offset_1;
+        // this moves everything to a common reference frame with the z axis pointing upward
+        rotation = rotation * reference_frame_offset;
 
         const std::vector<Eigen::Vector3d> side_points{Eigen::Vector3d(bx, 0., 0.), Eigen::Vector3d(0., -by, 0.),
                                                        Eigen::Vector3d(-bx, 0., 0.), Eigen::Vector3d(0., by, 0.)};
