@@ -981,6 +981,14 @@ bool Module::execute_grasp(const Pose& pose, const MatrixXd& object_points, cons
         {
             /* If the object is unknown we rely on the oriented bounding box points to evaluate object properties. */
 
+
+            /* Check that the points have been received. */
+            if (object_points.size() == 0)
+            {
+                yError() << log_name_ << "::execute_grasp(). The object is unknown but the vertices of the oriented bounding box have not been received. Aborting.";
+                return false;
+            }
+
             /* Evaluate object sizes with x, y and z axis in descending order. */
             VectorXd tmp_object_sizes = evaluate_object_sizes(pose, object_points);
 
