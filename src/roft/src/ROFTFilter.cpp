@@ -522,7 +522,7 @@ void ROFTFilter::filtering_step()
 
         VectorXd state(total_size);
         state.head<7>() = p_mean.tail<7>();
-        state.tail<6>() = p_mean.head<6>();
+        state.segment<6>(7) = p_mean.head<6>();
 
         if (bbox_tracked_points.size() != 0)
             for (std::size_t i = 0; i < bbox_tracked_points.cols(); i++)
