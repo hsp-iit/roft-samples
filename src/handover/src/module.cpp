@@ -140,7 +140,7 @@ bool Module::configure(yarp::os::ResourceFinder& rf)
     }
 
     const Bottle rf_object = rf.findGroup("OBJECT");
-    object_name_ = rf_object.check("name", Value("unknown")).asString();
+    object_name_ = rf_object.check("name", Value("006_mustard_bottle")).asString();
 
     const Bottle rf_parts = rf.findGroup("PARTS");
     bool enable_part_left = rf_parts.check("left", Value(false)).asBool();
@@ -963,24 +963,9 @@ bool Module::execute_grasp(const Pose& pose, const MatrixXd& object_points, cons
         rotation_offset.setIdentity();
 
         /* FIXME: These transformations might be unified at some point. */
-        if (object_name_ != "unknown")
-        {
-            /* Here we are considering precomputed object properties assuming NVidia NVDU DOPE reference frames. */
-            object_sizes = object_sizes_.at(object_name_);
-            object_offsets = object_offsets_.at(object_name_);
-
-            /* Make sure the rotation offset transforms the reference frame such that the z axis points upward. */
-            Eigen::Vector3d y_axis = pose.rotation().col(1);
-            if (abs(std::acos(y_axis.dot(Eigen::Vector3d::UnitZ()))) < M_PI / 2.0)
-                rotation_offset = rotation_offset * Eigen::AngleAxisd(M_PI, Eigen::Vector3d::UnitX()).toRotationMatrix();
-            Eigen::Matrix3d rot_offset_0 = Eigen::AngleAxisd(M_PI / 2.0, Eigen::Vector3d::UnitX()).toRotationMatrix();
-            Eigen::Matrix3d rot_offset_1 = Eigen::AngleAxisd(M_PI / 2.0, Eigen::Vector3d::UnitZ()).toRotationMatrix();
-            rotation_offset = rotation_offset * rot_offset_0 * rot_offset_1;
-        }
-        else
+        if (object_points.size() != 0)
         {
             /* If the object is unknown we rely on the oriented bounding box points to evaluate object properties. */
-
 
             /* Check that the points have been received. */
             if (object_points.size() == 0)
@@ -1002,6 +987,20 @@ bool Module::execute_grasp(const Pose& pose, const MatrixXd& object_points, cons
             if (abs(std::acos(x_axis.dot(Eigen::Vector3d::UnitZ()))) > M_PI / 2.0)
                 rotation_offset = rotation_offset * Eigen::AngleAxisd(M_PI, Eigen::Vector3d::UnitY()).toRotationMatrix();
             rotation_offset = rotation_offset * Eigen::AngleAxisd(M_PI / 2.0, Eigen::Vector3d::UnitY()).toRotationMatrix();
+        }
+        else
+        {
+            /* Here we are considering precomputed object properties assuming NVidia NVDU DOPE reference frames. */
+            object_sizes = object_sizes_.at(object_name_);
+            object_offsets = object_offsets_.at(object_name_);
+
+            /* Make sure the rotation offset transforms the reference frame such that the z axis points upward. */
+            Eigen::Vector3d y_axis = pose.rotation().col(1);
+            if (abs(std::acos(y_axis.dot(Eigen::Vector3d::UnitZ()))) < M_PI / 2.0)
+                rotation_offset = rotation_offset * Eigen::AngleAxisd(M_PI, Eigen::Vector3d::UnitX()).toRotationMatrix();
+            Eigen::Matrix3d rot_offset_0 = Eigen::AngleAxisd(M_PI / 2.0, Eigen::Vector3d::UnitX()).toRotationMatrix();
+            Eigen::Matrix3d rot_offset_1 = Eigen::AngleAxisd(M_PI / 2.0, Eigen::Vector3d::UnitZ()).toRotationMatrix();
+            rotation_offset = rotation_offset * rot_offset_0 * rot_offset_1;
         }
 
         if (cart_left_)
