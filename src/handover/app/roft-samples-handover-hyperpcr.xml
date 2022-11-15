@@ -4,7 +4,7 @@
     <module>
         <name>roft-samples-handover</name>
         <node>localhost</node>
-        <parameters>--OBJECT::name unknown</parameters>
+        <!-- <parameters>-\-OBJECT::name unknown</parameters> -->
     </module>
 
     <module>
