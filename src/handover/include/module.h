@@ -166,15 +166,18 @@ private:
 
     Eigen::VectorXd home_torso_joints_;
     Eigen::VectorXd home_arm_joints_;
-    Eigen::VectorXd home_hand_joints_;
     Eigen::VectorXd home_torso_joints_vels_;
     Eigen::VectorXd home_arm_joints_vels_;
+    Eigen::VectorXd home_hand_joints_left_;
+    Eigen::VectorXd home_hand_joints_right_;
+    Eigen::VectorXd home_hand_joints_vels_;
 
-    Eigen::VectorXd pregrasp_hand_joints_;
+    Eigen::VectorXd pregrasp_hand_joints_left_;
+    Eigen::VectorXd pregrasp_hand_joints_right_;
     Eigen::VectorXd grasp_hand_joints_left_;
     Eigen::VectorXd grasp_hand_joints_right_;
-    Eigen::VectorXd postgrasp_hand_joints_;
-    Eigen::VectorXd home_hand_joints_vels_;
+    Eigen::VectorXd postgrasp_hand_joints_left_;
+    Eigen::VectorXd postgrasp_hand_joints_right_;
     Eigen::VectorXd pregrasp_hand_joints_vels_;
     Eigen::VectorXd grasp_hand_joints_vels_left_;
     Eigen::VectorXd grasp_hand_joints_vels_right_;

@@ -110,18 +110,46 @@ bool Module::configure(yarp::os::ResourceFinder& rf)
         yError() << log_name_ + "::configure(). Error: cannot get parameter JOINT_CONTROL::right_grasp_joints";
         return false;
     }
-    yarp::sig::Vector hand_joint_home_configuration;
-    std::tie(is_vector, hand_joint_home_configuration) = load_vector_double(rf_joint_control, "home_hand_joints", 9);
+    yarp::sig::Vector hand_joint_home_configuration_left;
+    std::tie(is_vector, hand_joint_home_configuration_left) = load_vector_double(rf_joint_control, "left_home_hand_joints", 9);
     if (!is_vector)
     {
-        yError() << log_name_ + "::configure(). Error: cannot get parameter JOINT_CONTROL::home_hand_joints";
+        yError() << log_name_ + "::configure(). Error: cannot get parameter JOINT_CONTROL::left_home_hand_joints";
         return false;
     }
-    yarp::sig::Vector hand_joint_pregrasp_configuration;
-    std::tie(is_vector, hand_joint_pregrasp_configuration) = load_vector_double(rf_joint_control, "pregrasp_hand_joints", 9);
+    yarp::sig::Vector hand_joint_home_configuration_right;
+    std::tie(is_vector, hand_joint_home_configuration_right) = load_vector_double(rf_joint_control, "right_home_hand_joints", 9);
     if (!is_vector)
     {
-        yError() << log_name_ + "::configure(). Error: cannot get parameter JOINT_CONTROL::pregrasp_hand_joints";
+        yError() << log_name_ + "::configure(). Error: cannot get parameter JOINT_CONTROL::right_home_hand_joints";
+        return false;
+    }
+    yarp::sig::Vector hand_joint_pregrasp_configuration_left;
+    std::tie(is_vector, hand_joint_pregrasp_configuration_left) = load_vector_double(rf_joint_control, "left_pregrasp_hand_joints", 9);
+    if (!is_vector)
+    {
+        yError() << log_name_ + "::configure(). Error: cannot get parameter JOINT_CONTROL::left_pregrasp_hand_joints";
+        return false;
+    }
+    yarp::sig::Vector hand_joint_pregrasp_configuration_right;
+    std::tie(is_vector, hand_joint_pregrasp_configuration_right) = load_vector_double(rf_joint_control, "right_pregrasp_hand_joints", 9);
+    if (!is_vector)
+    {
+        yError() << log_name_ + "::configure(). Error: cannot get parameter JOINT_CONTROL::right_pregrasp_hand_joints";
+        return false;
+    }
+    yarp::sig::Vector hand_joint_postgrasp_configuration_left;
+    std::tie(is_vector, hand_joint_postgrasp_configuration_left) = load_vector_double(rf_joint_control, "left_postgrasp_hand_joints", 9);
+    if (!is_vector)
+    {
+        yError() << log_name_ + "::configure(). Error: cannot get parameter JOINT_CONTROL::left_postgrasp_hand_joints";
+        return false;
+    }
+    yarp::sig::Vector hand_joint_postgrasp_configuration_right;
+    std::tie(is_vector, hand_joint_postgrasp_configuration_right) = load_vector_double(rf_joint_control, "right_postgrasp_hand_joints", 9);
+    if (!is_vector)
+    {
+        yError() << log_name_ + "::configure(). Error: cannot get parameter JOINT_CONTROL::right_postgrasp_hand_joints";
         return false;
     }
     yarp::sig::Vector hand_joint_grasp_vels_left;
@@ -295,14 +323,16 @@ bool Module::configure(yarp::os::ResourceFinder& rf)
     home_arm_joints_ = toEigen(arm_joint_home_configuration);
 
     /* Set hand joints for home configuration. */
-    home_hand_joints_ = toEigen(hand_joint_home_configuration);
+    home_hand_joints_left_ = toEigen(hand_joint_home_configuration_left);
+    home_hand_joints_right_ = toEigen(hand_joint_home_configuration_right);
 
     /* Set hand joints for post grasp configuration. */
-    pregrasp_hand_joints_ = toEigen(hand_joint_pregrasp_configuration);
+    pregrasp_hand_joints_left_ = toEigen(hand_joint_pregrasp_configuration_left);
+    pregrasp_hand_joints_right_ = toEigen(hand_joint_pregrasp_configuration_right);
 
     /* Set hand joints for post grasp configuration. */
-    postgrasp_hand_joints_ = home_hand_joints_;
-    postgrasp_hand_joints_(1) = 80.0;
+    postgrasp_hand_joints_left_ = toEigen(hand_joint_postgrasp_configuration_left);
+    postgrasp_hand_joints_right_ = toEigen(hand_joint_postgrasp_configuration_right);
 
     /* Set hand joints for grasp configuration. */
     grasp_hand_joints_left_ = toEigen(hand_joint_grasp_configuration_left);
@@ -313,11 +343,11 @@ bool Module::configure(yarp::os::ResourceFinder& rf)
     home_arm_joints_vels_ = VectorXd::Ones(home_arm_joints_.size()) * 10.0;
 
     /* Set hand joints velocities for home configuration. */
-    home_hand_joints_vels_ = VectorXd::Ones(home_hand_joints_.size()) * 100.0;
+    home_hand_joints_vels_ = VectorXd::Ones(home_hand_joints_left_.size()) * 100.0;
     home_hand_joints_vels_(1) = 50.0;
 
     /* Set hand joints velocities for {pre, ,post} grasp. */
-    pregrasp_hand_joints_vels_ = VectorXd::Ones(pregrasp_hand_joints_.size()) * 100.0;
+    pregrasp_hand_joints_vels_ = VectorXd::Ones(pregrasp_hand_joints_left_.size()) * 100.0;
     pregrasp_hand_joints_vels_(1) = 50.0;
     postgrasp_hand_joints_vels_ = pregrasp_hand_joints_vels_;
     grasp_hand_joints_vels_left_ = toEigen(hand_joint_grasp_vels_left);
@@ -892,9 +922,9 @@ void Module::go_home_hand()
 
     /* Send setpoint. */
     if (joints_left_hand_)
-        joints_left_hand_->set_positions(home_hand_joints_, home_hand_joints_vels_, home_hand_considered_joints_);
+        joints_left_hand_->set_positions(home_hand_joints_left_, home_hand_joints_vels_, home_hand_considered_joints_);
     if (joints_right_hand_)
-        joints_right_hand_->set_positions(home_hand_joints_, home_hand_joints_vels_, home_hand_considered_joints_);
+        joints_right_hand_->set_positions(home_hand_joints_right_, home_hand_joints_vels_, home_hand_considered_joints_);
 }
 
 
@@ -1005,7 +1035,7 @@ bool Module::execute_grasp(const Pose& pose, const MatrixXd& object_points, cons
 
         if (cart_left_)
         {
-            auto grasper = std::make_unique<CardinalPointsGrasp>("left", pregrasp_hand_joints_);
+            auto grasper = std::make_unique<CardinalPointsGrasp>("left", pregrasp_hand_joints_left_);
             grasper->setObjectSizes(object_sizes);
             grasper->setObjectOffsets(object_offsets);
             grasper->setReferenceFrameOffset(rotation_offset);
@@ -1014,7 +1044,7 @@ bool Module::execute_grasp(const Pose& pose, const MatrixXd& object_points, cons
 
         if (cart_right_)
         {
-            auto grasper = std::make_unique<CardinalPointsGrasp>("right", pregrasp_hand_joints_);
+            auto grasper = std::make_unique<CardinalPointsGrasp>("right", pregrasp_hand_joints_right_);
             grasper->setObjectSizes(object_sizes);
             grasper->setObjectOffsets(object_offsets);
             grasper->setReferenceFrameOffset(rotation_offset);
@@ -1106,7 +1136,10 @@ bool Module::execute_grasp(const Pose& pose, const MatrixXd& object_points, cons
         grasp_cart_->controller().setTrajTime(approach_traj_time_);
 
         /* Hand pregrasp configuration .*/
-        grasp_joints_hand_->set_positions(pregrasp_hand_joints_, pregrasp_hand_joints_vels_, hand_considered_joints_);
+        if (grasp_type_ == "left")
+            grasp_joints_hand_->set_positions(pregrasp_hand_joints_left_, pregrasp_hand_joints_vels_, hand_considered_joints_);
+        else
+            grasp_joints_hand_->set_positions(pregrasp_hand_joints_right_, pregrasp_hand_joints_vels_, hand_considered_joints_);
 
         yInfo() << "[Grasp][Evaluate -> WaitHandPregrasp]";
 
@@ -1322,7 +1355,10 @@ bool Module::execute_grasp(const Pose& pose, const MatrixXd& object_points, cons
     else if (grasp_state_ == GraspState::Release)
     {
         /* Object release .*/
-        grasp_joints_hand_->set_positions(postgrasp_hand_joints_, postgrasp_hand_joints_vels_, hand_considered_joints_);
+        if (grasp_type_ == "left")
+            grasp_joints_hand_->set_positions(postgrasp_hand_joints_left_, postgrasp_hand_joints_vels_, hand_considered_joints_);
+        else
+            grasp_joints_hand_->set_positions(postgrasp_hand_joints_right_, postgrasp_hand_joints_vels_, hand_considered_joints_);
         yInfo() << "[Grasp][Release -> WaitRelease]";
 
         grasp_state_ = GraspState::WaitRelease;
