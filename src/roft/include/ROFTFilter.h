@@ -66,7 +66,8 @@ public:
         const bool wait_segmentation_initialization,
         const std::string& pose_reference_frame,
         const std::string& pose_meas_feedback,
-        const std::string& pose_rendering_style
+        const std::string& pose_rendering_style,
+        const int& segmentation_feed_rate
     );
 
     virtual ~ROFTFilter();

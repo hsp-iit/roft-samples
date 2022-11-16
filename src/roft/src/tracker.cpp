@@ -137,6 +137,7 @@ Tracker::Tracker(ResourceFinder& rf)
     const std::string segmentation_source = rf_segmentation.check("source", Value("")).asString();
     const bool flow_aided_segmentation = rf_segmentation.check("flow_aided", Value(false)).asBool();
     const bool wait_segmentation_initialization = rf_segmentation.check("wait_initialization", Value(false)).asBool();
+    const int feed_rate_segmentation = rf_segmentation.check("feed_rate", Value(1)).asInt32();
 
     /* Unscented transform. */
     const Bottle rf_unscented_transform = rf.findGroup("UNSCENTED_TRANSFORM");
@@ -378,7 +379,9 @@ Tracker::Tracker(ResourceFinder& rf)
         /* The kind of visual feedback the pose source requires to run. */
         pose_feedback,
         /* The kind of rendering style to use in the output probes. */
-        pose_rendering_style
+        pose_rendering_style,
+        /* Number of frawes to wait before sending a new RGB image to the segmentation source. */
+        feed_rate_segmentation
     );
 
     {

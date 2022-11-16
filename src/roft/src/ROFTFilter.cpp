@@ -60,7 +60,8 @@ ROFTFilter::ROFTFilter
     const bool wait_segmentation_initialization,
     const std::string& pose_reference_frame,
     const std::string& pose_meas_feedback,
-    const std::string& pose_rendering_style
+    const std::string& pose_rendering_style,
+    const int& segmentation_feed_rate
 ) :
     p_pred_belief_(9, 1, true),
     p_corr_belief_(9, 1, true),
@@ -126,9 +127,9 @@ ROFTFilter::ROFTFilter
         RobotsIO::Camera::CameraParameters parameters;
         std::tie(std::ignore, parameters) = camera_->camera_parameters();
         if (flow_source->get_matrix_type() == CV_32FC2)
-            segmentation_ = std::make_shared<ImageSegmentationMeasurement>(std::make_shared<ImageSegmentationOFAidedSource<cv::Vec2f>>(segmentation_source, flow_source, parameters, wait_segmentation_initialization), camera_);
+            segmentation_ = std::make_shared<ImageSegmentationMeasurement>(std::make_shared<ImageSegmentationOFAidedSource<cv::Vec2f>>(segmentation_source, flow_source, parameters, wait_segmentation_initialization, segmentation_feed_rate), camera_);
         else if (flow_source->get_matrix_type() == CV_16SC2)
-            segmentation_ = std::make_shared<ImageSegmentationMeasurement>(std::make_shared<ImageSegmentationOFAidedSource<cv::Vec2s>>(segmentation_source, flow_source, parameters, wait_segmentation_initialization), camera_);
+            segmentation_ = std::make_shared<ImageSegmentationMeasurement>(std::make_shared<ImageSegmentationOFAidedSource<cv::Vec2s>>(segmentation_source, flow_source, parameters, wait_segmentation_initialization, segmentation_feed_rate), camera_);
     }
     else
         segmentation_ = std::make_shared<ImageSegmentationMeasurement>(segmentation_source, camera_);
