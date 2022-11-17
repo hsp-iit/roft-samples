@@ -638,7 +638,7 @@ std::string Module::select_object(const std::string& object_name)
 
 std::tuple<bool, Eigen::Transform<double, 3, Eigen::Affine>, Vector3d, MatrixXd> Module::get_object_state()
 {
-    yarp::sig::Vector* state_yarp = port_state_.read(is_pose_input_buffered_);
+    yarp::sig::Vector* state_yarp = port_state_.read(false);
 
     auto yarp_to_transform = [](const yarp::sig::Vector& vector) -> Pose
     {
@@ -667,25 +667,19 @@ std::tuple<bool, Eigen::Transform<double, 3, Eigen::Affine>, Vector3d, MatrixXd>
     };
 
     if (state_yarp == nullptr)
-    {
-        if(is_pose_input_buffered_ && is_first_state_)
-            return std::make_tuple(true, last_object_pose_, last_object_velocity_, last_object_points_);
-        else
-            return std::make_tuple(false, Pose::Identity(), Vector3d::Zero(), MatrixXd());
-    }
+        return std::make_tuple(false, Pose::Identity(), Vector3d::Zero(), MatrixXd());
     else
     {
-        last_object_pose_ = yarp_to_transform(*state_yarp);
-        last_object_velocity_ = yarp_to_velocity(*state_yarp);
+        Transform object_pose = yarp_to_transform(*state_yarp);
+        Vector3d object_velocity = yarp_to_velocity(*state_yarp);
+        MatrixXd object_points;
 
-        /* FIXME: we should use a more general object here that handles the object pose, velocity and bounding box points. */
+        /* FIXME: we should use a more general object representation here that handles the object pose, velocity and bounding box points. */
         /* Check if object bounding box points have been transmitted. */
         if(state_yarp->size() == (7 + 6 + 8 * 3))
-            last_object_points_ = yarp_to_points(*state_yarp);
+            object_points = yarp_to_points(*state_yarp);
 
-        is_first_state_ = true;
-
-        return std::make_tuple(true, last_object_pose_, last_object_velocity_, last_object_points_);
+        return std::make_tuple(true, object_pose, object_velocity, object_points);
     }
 }
 
@@ -1398,6 +1392,8 @@ bool Module::execute_grasp(const Pose& pose, const MatrixXd& object_points, cons
 
         grasp_cart_ = nullptr;
         grasp_joints_hand_ = nullptr;
+
+        grasp_object_points_ = MatrixXd();
 
         yInfo() << "[Grasp][Cleanup -> Done]";
 

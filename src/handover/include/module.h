@@ -228,8 +228,6 @@ private:
 
     Eigen::MatrixXd last_object_points_;
 
-    const bool is_pose_input_buffered_ = false;
-
     bool is_first_state_ = false;
 
     /**
