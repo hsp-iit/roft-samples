@@ -124,6 +124,8 @@ ROFTFilter::ROFTFilter
     /* */
 
     /* Segmentation measurement. */
+    if (!((segmentation_sync_type == "stamped") || (segmentation_sync_type == "stampless")))
+        throw(std::runtime_error(log_name_ + "::ctor(). Error: unknown segmentation synchronization type '" + segmentation_sync_type + "'."));
     std::shared_ptr<RobotsIO::Utils::Segmentation> tmp_source;
     if (flow_aided_segmentation)
     {
