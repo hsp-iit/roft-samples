@@ -15,6 +15,7 @@
 #include <ROFT/CartesianQuaternionMeasurement.h>
 #include <ROFT/CartesianQuaternionModel.h>
 #include <ROFT/ImageSegmentationOFAidedSource.hpp>
+#include <ROFT/ImageSegmentationOFAidedSourceStamped.hpp>
 #include <ROFT/MeshResource.h>
 #include <ROFT/SpatialVelocityModel.h>
 #include <ROFT/SKFCorrection.h>
@@ -61,6 +62,7 @@ ROFTFilter::ROFTFilter
     const std::string& pose_reference_frame,
     const std::string& pose_meas_feedback,
     const std::string& pose_rendering_style,
+    const std::string& segmentation_sync_type,
     const int& segmentation_feed_rate
 ) :
     p_pred_belief_(9, 1, true),
@@ -122,17 +124,30 @@ ROFTFilter::ROFTFilter
     /* */
 
     /* Segmentation measurement. */
+    std::shared_ptr<RobotsIO::Utils::Segmentation> tmp_source;
     if (flow_aided_segmentation)
     {
         RobotsIO::Camera::CameraParameters parameters;
         std::tie(std::ignore, parameters) = camera_->camera_parameters();
+
         if (flow_source->get_matrix_type() == CV_32FC2)
-            segmentation_ = std::make_shared<ImageSegmentationMeasurement>(std::make_shared<ImageSegmentationOFAidedSource<cv::Vec2f>>(segmentation_source, flow_source, parameters, wait_segmentation_initialization, segmentation_feed_rate), camera_);
+        {
+            if (segmentation_sync_type == "stamped")
+                tmp_source = std::make_shared<ImageSegmentationOFAidedSourceStamped<cv::Vec2f>>(segmentation_source, flow_source, parameters, wait_segmentation_initialization, segmentation_feed_rate);
+            else if (segmentation_sync_type == "stampless")
+                tmp_source = std::make_shared<ImageSegmentationOFAidedSource<cv::Vec2f>>(segmentation_source, flow_source, parameters, wait_segmentation_initialization);
+        }
         else if (flow_source->get_matrix_type() == CV_16SC2)
-            segmentation_ = std::make_shared<ImageSegmentationMeasurement>(std::make_shared<ImageSegmentationOFAidedSource<cv::Vec2s>>(segmentation_source, flow_source, parameters, wait_segmentation_initialization, segmentation_feed_rate), camera_);
+        {
+            if (segmentation_sync_type == "stamped")
+                tmp_source = std::make_shared<ImageSegmentationOFAidedSourceStamped<cv::Vec2s>>(segmentation_source, flow_source, parameters, wait_segmentation_initialization, segmentation_feed_rate);
+            else if (segmentation_sync_type == "stampless")
+                tmp_source = std::make_shared<ImageSegmentationOFAidedSource<cv::Vec2s>>(segmentation_source, flow_source, parameters, wait_segmentation_initialization);
+        }
     }
     else
-        segmentation_ = std::make_shared<ImageSegmentationMeasurement>(segmentation_source, camera_);
+        tmp_source = segmentation_source;
+    segmentation_ = std::make_shared<ImageSegmentationMeasurement>(tmp_source, camera_);
 
     /* Flow measurement. */
     std::unique_ptr<LinearMeasurementModel> flow;

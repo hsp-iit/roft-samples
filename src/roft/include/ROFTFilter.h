@@ -67,6 +67,7 @@ public:
         const std::string& pose_reference_frame,
         const std::string& pose_meas_feedback,
         const std::string& pose_rendering_style,
+        const std::string& segmentation_sync_type,
         const int& segmentation_feed_rate
     );
 
