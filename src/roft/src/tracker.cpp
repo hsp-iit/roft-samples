@@ -135,6 +135,7 @@ Tracker::Tracker(ResourceFinder& rf)
    /* Segmentation. */
     const Bottle rf_segmentation = rf.findGroup("SEGMENTATION");
     const std::string segmentation_source = rf_segmentation.check("source", Value("")).asString();
+    const std::string segmentation_synchronization_type = rf_segmentation.check("synchronization_type", Value("")).asString();
     const bool flow_aided_segmentation = rf_segmentation.check("flow_aided", Value(false)).asBool();
     const bool wait_segmentation_initialization = rf_segmentation.check("wait_initialization", Value(false)).asBool();
     const int feed_rate_segmentation = rf_segmentation.check("feed_rate", Value(1)).asInt32();
@@ -242,7 +243,9 @@ Tracker::Tracker(ResourceFinder& rf)
 
     std::cout << "- source: " << segmentation_source << std::endl;
     std::cout << "- flow_aided: " << flow_aided_segmentation << std::endl;
-    std::cout << "- wait_initialization: " << wait_segmentation_initialization << std::endl << std::endl;
+    std::cout << "- wait_initialization: " << wait_segmentation_initialization << std::endl;
+    std::cout << "- feed_rate: " << feed_rate_segmentation << std::endl;
+    std::cout << "- synchronization_type: " << segmentation_synchronization_type << std::endl << std::endl;
 
     std::cout << "Unscented transform:" << std::endl;
     std::cout << "- alpha: " << ut_alpha << std::endl;
@@ -380,6 +383,8 @@ Tracker::Tracker(ResourceFinder& rf)
         pose_feedback,
         /* The kind of rendering style to use in the output probes. */
         pose_rendering_style,
+        /* The kind of synchronization mechanism to use for segmentation. */
+        segmentation_synchronization_type,
         /* Number of frawes to wait before sending a new RGB image to the segmentation source. */
         feed_rate_segmentation
     );
