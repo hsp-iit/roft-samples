@@ -34,7 +34,7 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | d
 # Install additional dependencies
 RUN apt update && \
     apt install --no-install-recommends -y -qq eog libassimp-dev libconfig++-dev libglfw3-dev libglew-dev libgtk2.0-dev libglm-dev libeigen3-dev libpython3-dev libqt5svg5 libtclap-dev libvtk7-dev && \
-    git clone --progress https://github.com/robotology/robotology-superbuild && cd robotology-superbuild && bash scripts/install_apt_dependencies.sh && \
+    git clone --progress https://github.com/robotology/robotology-superbuild && cd robotology-superbuild && git checkout v2022.11.0 && bash scripts/install_apt_dependencies.sh && \
     apt remove -y libopencv* && \
     rm -rf /var/lib/apt/lists/*
 
@@ -69,7 +69,6 @@ RUN git clone --progress https://github.com/lagadic/visp && \
 RUN git config --global user.name "user" && \
     git config --global user.email "user@email.com" && \
     cd robotology-superbuild && \
-    git checkout v2022.09.0 && \
     mkdir build && cd build && \
     cmake -DROBOTOLOGY_ENABLE_CORE=ON -DROBOTOLOGY_USES_GAZEBO=OFF -DROBOTOLOGY_USES_PYTHON=ON -DROBOTOLOGY_USES_LUA=ON -DYCM_EP_ADDITIONAL_CMAKE_ARGS:STRING="-DICUB_COMPILE_BINDINGS:BOOL=ON -DCREATE_PYTHON:BOOL=ON -DENABLE_yarpmod_RGBDSensorWrapper:BOOL=ON -DENABLE_yarpmod_RGBDSensorClient:BOOL=ON -DENABLE_yarpcar_mjpeg:BOOL=ON -DENABLE_yarppm_depthimage_to_rgb:BOOL=ON -DENABLE_yarppm_depthimage_compression_zlib:BOOL=ON" ../ && \
     make -j$NJOBS
