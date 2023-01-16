@@ -61,14 +61,14 @@ reaching_offset      0.03
 [JOINT_CONTROL]
 home_arm_joints               (-30.0, 30.0, 0.0, 45.0, 0.0, 0.0, 0.0)
 
-left_grasp_joints             (45.0, 80.0, 20.0, 20.0, 20.0, 25.0, 20.0, 25.0, 120.0)
+left_grasp_joints             (45.0, 80.0, 15.0, 25.0, 30.0, 55.0, 30.0, 55.0, 120.0)
 left_home_hand_joints         (45.0, 40.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 left_pregrasp_hand_joints     (45.0, 80.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 left_pregrasp_hand_joints_ik  (45.0, 90.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 left_postgrasp_hand_joints    (45.0, 80.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 left_grasp_vels               (100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0)
 
-right_grasp_joints            (45.0, 80.0, 20.0, 20.0, 20.0, 25.0, 20.0, 25.0, 120.0)
+right_grasp_joints            (45.0, 80.0, 15.0, 25.0, 20.0, 25.0, 20.0, 25.0, 120.0)
 right_home_hand_joints        (45.0, 40.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 right_pregrasp_hand_joints    (45.0, 80.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 right_pregrasp_hand_joints_ik (45.0, 90.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
