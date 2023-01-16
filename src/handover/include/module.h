@@ -175,6 +175,8 @@ private:
 
     Eigen::VectorXd pregrasp_hand_joints_left_;
     Eigen::VectorXd pregrasp_hand_joints_right_;
+    Eigen::VectorXd pregrasp_hand_joints_left_ik_;
+    Eigen::VectorXd pregrasp_hand_joints_right_ik_;
     Eigen::VectorXd grasp_hand_joints_left_;
     Eigen::VectorXd grasp_hand_joints_right_;
     Eigen::VectorXd postgrasp_hand_joints_left_;

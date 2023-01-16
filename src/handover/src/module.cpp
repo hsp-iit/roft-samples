@@ -139,6 +139,20 @@ bool Module::configure(yarp::os::ResourceFinder& rf)
         yError() << log_name_ + "::configure(). Error: cannot get parameter JOINT_CONTROL::right_pregrasp_hand_joints";
         return false;
     }
+    yarp::sig::Vector hand_joint_pregrasp_configuration_left_ik;
+    std::tie(is_vector, hand_joint_pregrasp_configuration_left_ik) = load_vector_double(rf_joint_control, "left_pregrasp_hand_joints_ik", 9);
+    if (!is_vector)
+    {
+        yError() << log_name_ + "::configure(). Error: cannot get parameter JOINT_CONTROL::left_pregrasp_hand_joints";
+        return false;
+    }
+    yarp::sig::Vector hand_joint_pregrasp_configuration_right_ik;
+    std::tie(is_vector, hand_joint_pregrasp_configuration_right_ik) = load_vector_double(rf_joint_control, "right_pregrasp_hand_joints_ik", 9);
+    if (!is_vector)
+    {
+        yError() << log_name_ + "::configure(). Error: cannot get parameter JOINT_CONTROL::right_pregrasp_hand_joints";
+        return false;
+    }
     yarp::sig::Vector hand_joint_postgrasp_configuration_left;
     std::tie(is_vector, hand_joint_postgrasp_configuration_left) = load_vector_double(rf_joint_control, "left_postgrasp_hand_joints", 9);
     if (!is_vector)
@@ -330,6 +344,10 @@ bool Module::configure(yarp::os::ResourceFinder& rf)
     /* Set hand joints for post grasp configuration. */
     pregrasp_hand_joints_left_ = toEigen(hand_joint_pregrasp_configuration_left);
     pregrasp_hand_joints_right_ = toEigen(hand_joint_pregrasp_configuration_right);
+
+    /* The same as above, used for the inverse kinematics. */
+    pregrasp_hand_joints_left_ik_ = toEigen(hand_joint_pregrasp_configuration_left_ik);
+    pregrasp_hand_joints_right_ik_ = toEigen(hand_joint_pregrasp_configuration_right_ik);
 
     /* Set hand joints for post grasp configuration. */
     postgrasp_hand_joints_left_ = toEigen(hand_joint_postgrasp_configuration_left);
@@ -1030,7 +1048,7 @@ bool Module::execute_grasp(const Pose& pose, const MatrixXd& object_points, cons
 
         if (cart_left_)
         {
-            auto grasper = std::make_unique<CardinalPointsGrasp>("left", pregrasp_hand_joints_left_);
+            auto grasper = std::make_unique<CardinalPointsGrasp>("left", pregrasp_hand_joints_left_ik_);
             grasper->setObjectSizes(object_sizes);
             grasper->setObjectOffsets(object_offsets);
             grasper->setReferenceFrameOffset(rotation_offset);
@@ -1039,7 +1057,7 @@ bool Module::execute_grasp(const Pose& pose, const MatrixXd& object_points, cons
 
         if (cart_right_)
         {
-            auto grasper = std::make_unique<CardinalPointsGrasp>("right", pregrasp_hand_joints_right_);
+            auto grasper = std::make_unique<CardinalPointsGrasp>("right", pregrasp_hand_joints_right_ik_);
             grasper->setObjectSizes(object_sizes);
             grasper->setObjectOffsets(object_offsets);
             grasper->setReferenceFrameOffset(rotation_offset);
