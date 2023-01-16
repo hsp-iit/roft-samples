@@ -739,37 +739,37 @@ bool Module::is_pose_grasp_safe(const Pose& pose)
 
     if (x > grasp_limit_x_upper_)
     {
-        // yError() << log_name_ << "::is_pose_grasp_safe(). Error on x:" << x << ">" << grasp_limit_x_upper_ ;
+        yError() << log_name_ << "::is_pose_grasp_safe(). Error on x:" << x << ">" << grasp_limit_x_upper_ ;
         return false;
     }
 
     if (x < grasp_limit_x_lower_)
     {
-        // yError() << log_name_ << "::is_pose_grasp_safe(). Error on x:" << x << "<" << grasp_limit_x_lower_ ;
+        yError() << log_name_ << "::is_pose_grasp_safe(). Error on x:" << x << "<" << grasp_limit_x_lower_ ;
         return false;
     }
 
     if (y > grasp_limit_y_upper_)
     {
-        // yError() << log_name_ << "::is_pose_grasp_safe(). Error on y:" << y << ">" << grasp_limit_y_upper_ ;
+        yError() << log_name_ << "::is_pose_grasp_safe(). Error on y:" << y << ">" << grasp_limit_y_upper_ ;
         return false;
     }
 
     if (y < grasp_limit_y_lower_)
     {
-        // yError() << log_name_ << "::is_pose_grasp_safe(). Error on y:" << y << "<" << grasp_limit_y_lower_ ;
+        yError() << log_name_ << "::is_pose_grasp_safe(). Error on y:" << y << "<" << grasp_limit_y_lower_ ;
         return false;
     }
 
     if (z > grasp_limit_z_upper_)
     {
-        // yError() << log_name_ << "::is_pose_grasp_safe(). Error on z:" << z << "<" << grasp_limit_z_upper_ ;
+        yError() << log_name_ << "::is_pose_grasp_safe(). Error on z:" << z << "<" << grasp_limit_z_upper_ ;
         return false;
     }
 
     if (z < grasp_limit_z_lower_)
     {
-        // yError() << log_name_ << "::is_pose_grasp_safe(). Error on z:" << z << "<" << grasp_limit_z_lower_ ;
+        yError() << log_name_ << "::is_pose_grasp_safe(). Error on z:" << z << "<" << grasp_limit_z_lower_ ;
         return false;
     }
 
