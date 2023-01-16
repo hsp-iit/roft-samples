@@ -86,6 +86,7 @@ bool Module::configure(yarp::os::ResourceFinder& rf)
 
     const Bottle rf_grasp_tweaks = rf.findGroup("GRASP_POSE_TWEAKS");
     grasp_tweak_rot_y_ = rf_grasp_tweaks.check("rot_y", Value(0.0)).asFloat64();
+    grasp_tweak_reaching_offset_ = rf_grasp_tweaks.check("reaching_offset", Value(0.0)).asFloat64();
 
     const Bottle rf_joint_control = rf.findGroup("JOINT_CONTROL");
     bool is_vector;
@@ -1206,7 +1207,7 @@ bool Module::execute_grasp(const Pose& pose, const MatrixXd& object_points, cons
     {
         /* Arm final configuration. */
         const auto dir = grasp_center_ - grasp_target_position_;
-        const auto target = grasp_target_position_ + 0.015 * dir / norm(dir);
+        const auto target = grasp_target_position_ + grasp_tweak_reaching_offset_ * dir / norm(dir);
 
         if (!is_position_cart_safe(target))
         {
