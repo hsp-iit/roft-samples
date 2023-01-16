@@ -87,6 +87,8 @@ bool Module::configure(yarp::os::ResourceFinder& rf)
     const Bottle rf_grasp_tweaks = rf.findGroup("GRASP_POSE_TWEAKS");
     grasp_tweak_rot_y_ = rf_grasp_tweaks.check("rot_y", Value(0.0)).asFloat64();
     grasp_tweak_reaching_offset_ = rf_grasp_tweaks.check("reaching_offset", Value(0.0)).asFloat64();
+    grasp_tweak_translational_precision_ = rf_grasp_tweaks.check("translational_precision", Value(0.005)).asFloat64();
+    grasp_tweak_rotational_precision_ = rf_grasp_tweaks.check("rotational_precision", Value(10.0)).asFloat64();
 
     const Bottle rf_joint_control = rf.findGroup("JOINT_CONTROL");
     bool is_vector;
@@ -1048,7 +1050,7 @@ bool Module::execute_grasp(const Pose& pose, const MatrixXd& object_points, cons
 
         if (cart_left_)
         {
-            auto grasper = std::make_unique<CardinalPointsGrasp>("left", pregrasp_hand_joints_left_ik_);
+            auto grasper = std::make_unique<CardinalPointsGrasp>("left", pregrasp_hand_joints_left_ik_, grasp_tweak_translational_precision_, grasp_tweak_rotational_precision_);
             grasper->setObjectSizes(object_sizes);
             grasper->setObjectOffsets(object_offsets);
             grasper->setReferenceFrameOffset(rotation_offset);
@@ -1057,7 +1059,7 @@ bool Module::execute_grasp(const Pose& pose, const MatrixXd& object_points, cons
 
         if (cart_right_)
         {
-            auto grasper = std::make_unique<CardinalPointsGrasp>("right", pregrasp_hand_joints_right_ik_);
+            auto grasper = std::make_unique<CardinalPointsGrasp>("right", pregrasp_hand_joints_right_ik_, grasp_tweak_translational_precision_, grasp_tweak_rotational_precision_);
             grasper->setObjectSizes(object_sizes);
             grasper->setObjectOffsets(object_offsets);
             grasper->setReferenceFrameOffset(rotation_offset);

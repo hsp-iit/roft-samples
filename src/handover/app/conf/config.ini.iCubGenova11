@@ -57,6 +57,8 @@ limit_z_upper        0.3
 [GRASP_POSE_TWEAKS]
 rot_y                20.0
 reaching_offset      0.03
+positional_precision 0.005
+rotational_precision 10.0
 
 [JOINT_CONTROL]
 home_arm_joints               (-30.0, 30.0, 0.0, 45.0, 0.0, 0.0, 0.0)

@@ -120,6 +120,8 @@ private:
 
     double grasp_tweak_rot_y_;
     double grasp_tweak_reaching_offset_;
+    double grasp_tweak_translational_precision_;
+    double grasp_tweak_rotational_precision_;
 
     /**
      * iCub Cartesian controllers.

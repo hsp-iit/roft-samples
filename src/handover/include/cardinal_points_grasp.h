@@ -83,6 +83,8 @@ class CardinalPointsGrasp {
     double fingers_max_length{0.};
     double dist_center_index_middle{0.};
     double approach_min_distance{0.};
+    double translational_precision;
+    double rotational_precision;
     yarp::sig::Matrix approach;
 
     std::vector<std::unique_ptr<iCub::iKin::iCubFinger>> fingers;
@@ -110,12 +112,12 @@ class CardinalPointsGrasp {
         yarp::sig::Vector xdhat, odhat, qdhat;
         if (iarm->askForPose(xd, od, xdhat, odhat, qdhat)) {
             // always enforce reaching in position first
-            if (yarp::math::norm(xd - xdhat) < .005) {
+            if (yarp::math::norm(xd - xdhat) < translational_precision) {
                 const auto rot = yarp::math::dcm2axis(yarp::math::axis2dcm(od) *
                                  yarp::math::axis2dcm(odhat).transposed());
                 // cost in [0, 1] = normalized angle difference
                 const auto cost = std::abs(rot[3] / M_PI);
-                if (180. * cost < 10.) {
+                if (180. * cost < rotational_precision) {
                     return cost;
                 }
             }
@@ -128,8 +130,11 @@ public:
     CardinalPointsGrasp() = delete;
 
     /**************************************************************************/
-    CardinalPointsGrasp(const std::string& hand_, const Eigen::VectorXd& pregrasp_fingers_posture_) :
-        hand(hand_), pregrasp_fingers_posture(pregrasp_fingers_posture_)
+    CardinalPointsGrasp(const std::string& hand_, const Eigen::VectorXd& pregrasp_fingers_posture_, const double& translational_precision, const double& rotational_precision) :
+        hand(hand_),
+        pregrasp_fingers_posture(pregrasp_fingers_posture_),
+        translational_precision(translational_precision),
+        rotational_precision(rotational_precision)
     {
         // create fingers and set them up in the pregrasp posture
         std::vector<std::string> fingers_names{"thumb", "index", "middle", "ring", "little"};
