@@ -18,10 +18,10 @@ enable_wrist_limits  false
 wrist_pitch_max      20.0
 wrist_pitch_min      -80.0
 
-limit_x_lower        -0.45
+limit_x_lower        -0.50
 limit_x_upper        -0.2
-limit_y_lower        -0.2
-limit_y_upper        0.2
+limit_y_lower        -0.3
+limit_y_upper        0.3
 limit_z_lower        -0.25
 limit_z_upper        0.35
 
@@ -47,18 +47,18 @@ angular_error        10.0
 translation_error    0.1
 
 [GRASP_LIMITS]
-limit_x_lower        -0.4
+limit_x_lower        -0.5
 limit_x_upper        -0.2
-limit_y_lower        -0.2
-limit_y_upper        0.2
+limit_y_lower        -0.3
+limit_y_upper        0.3
 limit_z_lower        -0.25
-limit_z_upper        0.3
+limit_z_upper        0.35
 
 [GRASP_POSE_TWEAKS]
 rot_y                20.0
 reaching_offset      0.03
-positional_precision 0.005
-rotational_precision 10.0
+positional_precision 0.015
+rotational_precision 30.0
 
 [JOINT_CONTROL]
 home_arm_joints               (-30.0, 30.0, 0.0, 45.0, 0.0, 0.0, 0.0)
