@@ -84,7 +84,7 @@ RUN source /robotology-superbuild/build/install/share/robotology-superbuild/setu
 
 # Build bayes-filters-lib
 RUN git clone --progress https://github.com/robotology/bayes-filters-lib && \
-    cd bayes-filters-lib && git checkout devel && mkdir build && cd build && \
+    cd bayes-filters-lib && mkdir build && cd build && \
     cmake .. && \
     make -j$NJOBS install && \
     rm -rf /bayes-filters-lib
