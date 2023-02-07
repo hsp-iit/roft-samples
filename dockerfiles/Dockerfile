@@ -108,7 +108,7 @@ RUN source /robotology-superbuild/build/install/share/robotology-superbuild/setu
 # Build ROFT
 RUN source /robotology-superbuild/build/install/share/robotology-superbuild/setup.sh && \
     git clone --progress https://github.com/hsp-iit/roft && \
-    cd roft && git checkout impl/online && mkdir build && cd build && \
+    cd roft && mkdir build && cd build && \
     cmake .. && \
     make -j$NJOBS install && \
     rm -rf /roft
