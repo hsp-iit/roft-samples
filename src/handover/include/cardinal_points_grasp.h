@@ -154,7 +154,8 @@ public:
         const auto p_middle = fingers[2]->EndEffPosition();
         const auto dist_1 = yarp::math::norm(p_thumb - p_index);
         const auto dist_2 = yarp::math::norm(p_thumb - p_middle);
-        pregrasp_aperture = std::min(dist_1, dist_2);
+
+        pregrasp_aperture = std::min(dist_1, dist_2) * 1.2;
         const auto p_ = (dist_1 < dist_2 ? p_index : p_middle);
         const auto pregrasp_aperture_angle = std::acos(yarp::math::dot(p_thumb, p_) /
                                                        (yarp::math::norm(p_thumb) * yarp::math::norm(p_)));
