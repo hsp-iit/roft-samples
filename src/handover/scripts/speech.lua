@@ -1,11 +1,5 @@
 #!/usr/bin/lua
 
--- Copyright: (C) 2021 iCub Facility - Istituto Italiano di Tecnologia (IIT)
-
--- Authors: Vadim Tikhanoff <vadim.tikhanoff@iit.it>
---          Elisa Maiettini <elisa.maiettini@iit.it>
---          Nicola Piga <nicola.piga@iit.it>
-
 local signal = require("posix.signal")
 require("yarp")
 
@@ -32,10 +26,10 @@ end)
 yarp.Network()
 
 port_speech_recog = yarp.Port()
-port_speech_recog:open("/roft-track-n-grasp/speech/speech_recognizer:o")
+port_speech_recog:open("/roft-samples-handover/speech_recognizer:o")
 
 port_output = yarp.Port()
-port_output:open("/roft-track-n-grasp/speech/object:o")
+port_output:open("/roft-samples-handover-speech/object:o")
 
 ret = true
 ret = ret and yarp.NetworkBase_connect(port_speech_recog:getName(), "/speechRecognizer/rpc")
