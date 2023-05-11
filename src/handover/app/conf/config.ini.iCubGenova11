@@ -3,7 +3,7 @@ frequency            30
 use_face_expression  true
 
 [CARTESIAN_CONTROL]
-approach_traj_time   1.5
+approach_traj_time   1.7
 
 torso_pitch          true
 torso_roll           true
@@ -44,7 +44,7 @@ eyes_time_home       1.0
 [GRASP_ABORT]
 angular              false
 angular_error        10.0
-translation_error    0.1
+translation_error    0.2
 
 [GRASP_LIMITS]
 limit_x_lower        -0.5
@@ -63,18 +63,18 @@ rotational_precision 30.0
 [JOINT_CONTROL]
 home_arm_joints               (-30.0, 30.0, 0.0, 45.0, 0.0, 0.0, 0.0)
 
-left_grasp_joints             (45.0, 80.0, 15.0, 25.0, 30.0, 55.0, 30.0, 55.0, 120.0)
-left_home_hand_joints         (45.0, 40.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
-left_pregrasp_hand_joints     (45.0, 80.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
-left_pregrasp_hand_joints_ik  (45.0, 90.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
-left_postgrasp_hand_joints    (45.0, 80.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+left_grasp_joints             (30.0, 80.0, 15.0, 35.0, 30.0, 60.0, 30.0, 60.0, 120.0)
+left_home_hand_joints         (30.0, 40.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+left_pregrasp_hand_joints     (30.0, 80.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+left_pregrasp_hand_joints_ik  (30.0, 90.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+left_postgrasp_hand_joints    (30.0, 80.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 left_grasp_vels               (100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0)
 
-right_grasp_joints            (45.0, 80.0, 15.0, 25.0, 20.0, 25.0, 20.0, 25.0, 120.0)
-right_home_hand_joints        (45.0, 40.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
-right_pregrasp_hand_joints    (45.0, 80.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
-right_pregrasp_hand_joints_ik (45.0, 90.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
-right_postgrasp_hand_joints   (45.0, 80.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+right_grasp_joints            (30.0, 80.0, 15.0, 25.0, 25.0, 40.0, 25.0, 40.0, 100.0)
+right_home_hand_joints        (30.0, 40.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+right_pregrasp_hand_joints    (30.0, 80.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+right_pregrasp_hand_joints_ik (30.0, 90.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+right_postgrasp_hand_joints   (30.0, 80.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 right_grasp_vels              (100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0)
 
 [OBJECT]
