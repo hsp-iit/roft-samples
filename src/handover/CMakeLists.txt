@@ -66,5 +66,6 @@ install(TARGETS ${EXE_TARGET_NAME} DESTINATION bin)
 
 # Configuration files
 yarp_install(FILES app/roft-samples-handover.xml DESTINATION ${ICUBCONTRIB_APPLICATIONS_TEMPLATES_INSTALL_DIR})
+yarp_install(FILES app/roft-samples-handover-speech.xml DESTINATION ${ICUBCONTRIB_APPLICATIONS_TEMPLATES_INSTALL_DIR})
 yarp_install(FILES app/conf/config.ini DESTINATION ${ICUBCONTRIB_CONTEXTS_INSTALL_DIR}/${EXE_TARGET_NAME})
 yarp_install(FILES scripts/roft-samples-handover-speech.lua DESTINATION bin PERMISSIONS OWNER_READ OWNER_EXECUTE)

@@ -7,7 +7,7 @@
     </module>
 
     <module>
-        <name>speech.lua</name>
+        <name>roft-samples-handover-speech.lua</name>
         <node>localhost</node>
         <dependencies>
             <port timeout="2.0">/speechRecognizer/rpc</port>
