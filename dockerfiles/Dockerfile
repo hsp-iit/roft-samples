@@ -33,8 +33,9 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | d
 
 # Install additional dependencies
 RUN apt update && \
-    apt install --no-install-recommends -y -qq eog libassimp-dev libconfig++-dev libglfw3-dev libglew-dev libgtk2.0-dev libglm-dev libeigen3-dev libpython3-dev libqt5svg5 libtclap-dev libvtk7-dev && \
-    git clone --progress https://github.com/robotology/robotology-superbuild && cd robotology-superbuild && git checkout v2022.11.0 && bash scripts/install_apt_dependencies.sh && \
+    apt install --no-install-recommends -y -qq eog libassimp-dev libconfig++-dev libglfw3-dev libglew-dev libgtk2.0-dev libglm-dev libeigen3-dev liblua5.1-dev libpython3-dev libqt5svg5 libtclap-dev libvtk7-dev lua-posix luarocks && \
+    luarocks install luaposix && \
+    git clone --progress https://github.com/robotology/robotology-superbuild && cd robotology-superbuild && git checkout v2023.02.3 && bash scripts/install_apt_dependencies.sh && \
     apt remove -y libopencv* && \
     rm -rf /var/lib/apt/lists/*
 
@@ -152,6 +153,7 @@ RUN mkdir -p /home/user/.local/share/yarp/contexts && \
     echo "export YARP_DATA_DIRS=\$YARP_DATA_DIRS:/home/user/roft-samples/install/share/ICUBcontrib" >> /home/user/.bashrc && \
     echo "export PATH=\$PATH:/home/user/roft-samples/install/bin" >> /home/user/.bashrc && \
     echo "export YARP_RUNTIME_DIR=/home/user/.runtime" >> /home/user/.bashrc && \
+    echo "export ENV LUA_CPATH=';;;/robotology-superbuild/build/install/lib/lua/5.2/?.so'" >> /home/user/.bashrc && \
 #
 # roft-samples-tracker xml and config
     cp /home/user/roft-samples/install/share/ICUBcontrib/templates/applications/*.xml /home/user/.local/share/yarp/applications/ && \
