@@ -1,0 +1,23 @@
+<application>
+    <name>ROFT Handover with iCub (speech utils)</name>
+
+    <module>
+        <name>speechRecognizer</name>
+        <node>r1-vm-windows</node>
+    </module>
+
+    <module>
+        <name>speech.lua</name>
+        <node>localhost</node>
+        <dependencies>
+            <port timeout="2.0">/speechRecognizer/rpc</port>
+        </dependencies>
+    </module>
+
+    <connection>
+        <from>/roft-samples-handover-speech/object:o</from>
+        <to>/roft-samples-handover/rpc:i</to>
+        <protocol>fast_tcp</protocol>
+    </connection>
+
+</application>
