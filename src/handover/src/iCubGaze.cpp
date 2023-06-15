@@ -47,7 +47,7 @@ iCubGaze::iCubGaze(const std::string& robot_name, const std::string& port_prefix
     home_configuration_.resize(3);
     home_configuration_(0) = -1.0;
     home_configuration_(1) = 0.0;
-    home_configuration_(2) = 0.3;
+    home_configuration_(2) = 0.5;
 }
 
 
