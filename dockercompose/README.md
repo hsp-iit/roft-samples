@@ -11,11 +11,11 @@ cd roft-samples/dockercompose
 docker stack deploy -c docker-compose.yml roft-samples-handover-stack
 ```
 
-After running the demo, stop all containers, stop the stack and remove the containers:
+After running the demo, stop all services and rm the stack:
 
 ```console
 docker service update --replicas 0 roft
 docker service update --replicas 0 detectron2
 docker service update --replicas 0 dope
-docker stack tm roft-samples-handover-stack
+docker stack rm roft-samples-handover-stack
 ```
