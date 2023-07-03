@@ -1,0 +1,16 @@
+<application>
+  <name>ROFT Handover with iCub (embedded)</name>
+
+    <application>
+      <name>ROFT</name>
+    </application>
+
+    <application>
+      <name>ROFT_Handover_with_iCub</name>
+    </application>
+
+    <application>
+      <name>ROFT_Handover_with_iCub_(speech_utils)</name>
+    </application>
+
+</application>
