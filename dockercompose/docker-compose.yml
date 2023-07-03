@@ -44,6 +44,7 @@ x-gpu-resource-1:
 services:
     roft:
         image: roft-samples:latest
+        container_name: roft-samples-cnt-stack
         <<: &common
         deploy:
             <<: *deploy-restart-common
@@ -53,7 +54,8 @@ services:
                           yarpmanager --application ~/.local/share/yarp/applications/roft-samples-handover-embedded.xml"
 
     detectron2:
-        image: ycbv-cv-pretrained-models:latest
+        image: ycb-pretrained-cv-models:latest
+        container_name: ycb-pretrained-cv-models-detectron2-stack
         <<: *common
         deploy:
             <<: *deploy-restart-common
@@ -62,13 +64,14 @@ services:
         command: bash -c "source ~/robotology-superbuild/build/install/share/robotology-superbuild/setup.sh &&
                           yarp conf ${YYARP_HOSTNAME} 10000 &&
                           yarp wait ${YARP_NAMESPACE} &&
-                          cd ycbv-cv-pretrained-models &&
+                          cd ycb-pretrained-cv-models &&
                           cd detectron2 &&
                           . env_detectron2/bin/activate &&
                           python detectron2_yarp_module.py gpu_id 0"
 
     dope:
-        image: ycbv-cv-pretrained-models:latest
+        image: ycb-pretrained-cv-models:latest
+        container_name: ycb-pretrained-cv-models-dope-stack
         <<: *common
         deploy:
             <<: *deploy-restart-common
@@ -77,7 +80,7 @@ services:
         command: bash -c "source ~/robotology-superbuild/build/install/share/robotology-superbuild/setup.sh &&
                           yarp conf ${YYARP_HOSTNAME} 10000 &&
                           yarp wait ${YARP_NAMESPACE} &&
-                          cd ycbv-cv-pretrained-models &&
+                          cd ycb-pretrained-cv-models &&
                           cd dope &&
                           . env_dope/bin/activate &&
                           yarp wait ${YARP_NAMESPACE} &&
