@@ -1,0 +1,84 @@
+version: "3"
+
+x-common:
+    &common
+    environment:
+        - DISPLAY=${DISPLAY}
+        - NVIDIA_DRIVER_CAPABILITIES=all
+        - YARP_COLORED_OUTPUT=1
+        - YARP_NAMESPACE=/icub01
+        - YYARP_HOSTNAME=?
+    volumes:
+        - "/tmp/.X11-unix:/tmp/.X11-unix"
+        - "/dev:/dev"
+    user: user
+
+x-deploy-restart-common:
+    &deploy-restart-common
+    restart_policy:
+        condition: none
+
+x-ycb-cv-deployer:
+    &ycb-cv-deployer
+    placement:
+        constraints:
+            - node.labels.ycb_cv_deployer==true
+
+x-gpu-resource-0:
+    &gpu-resource-0
+    resources:
+        reservations:
+            generic_resources:
+                - discrete_resource_spec:
+                    kind: "NVIDIA-GPU"
+                    value: 0
+
+x-gpu-resource-1:
+    &gpu-resource-1
+    resources:
+        reservations:
+            generic_resources:
+                - discrete_resource_spec:
+                    kind: "NVIDIA-GPU"
+                    value: 1
+services:
+    roft:
+        image: roft-samples:latest
+        <<: &common
+        deploy:
+            <<: *deploy-restart-common
+        command: bash -c "source ~/robotology-superbuild/build/install/share/robotology-superbuild/setup.sh &&
+                          yarp conf ${YYARP_HOSTNAME} 10000 &&
+                          yarp wait ${YARP_NAMESPACE} &&
+                          yarpmanager --application ~/.local/share/yarp/applications/roft-samples-handover-embedded.xml"
+
+    detectron2:
+        image: ycbv-cv-pretrained-models:latest
+        <<: *common
+        deploy:
+            <<: *deploy-restart-common
+            <<: *ycb-cv-deployer
+            <<: *gpu-resource-1
+        command: bash -c "source ~/robotology-superbuild/build/install/share/robotology-superbuild/setup.sh &&
+                          yarp conf ${YYARP_HOSTNAME} 10000 &&
+                          yarp wait ${YARP_NAMESPACE} &&
+                          cd ycbv-cv-pretrained-models &&
+                          cd detectron2 &&
+                          . env_detectron2/bin/activate &&
+                          python detectron2_yarp_module.py gpu_id 0"
+
+    dope:
+        image: ycbv-cv-pretrained-models:latest
+        <<: *common
+        deploy:
+            <<: *deploy-restart-common
+            <<: *ycb-cv-deployer
+            <<: *gpu-resource-0
+        command: bash -c "source ~/robotology-superbuild/build/install/share/robotology-superbuild/setup.sh &&
+                          yarp conf ${YYARP_HOSTNAME} 10000 &&
+                          yarp wait ${YARP_NAMESPACE} &&
+                          cd ycbv-cv-pretrained-models &&
+                          cd dope &&
+                          . env_dope/bin/activate &&
+                          yarp wait ${YARP_NAMESPACE} &&
+                          python dope_yarp_module.py gpu_id 0"
