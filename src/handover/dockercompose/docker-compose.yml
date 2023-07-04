@@ -7,7 +7,7 @@ x-common:
         - NVIDIA_DRIVER_CAPABILITIES=all
         - YARP_COLORED_OUTPUT=1
         - YARP_NAMESPACE=/icub01
-        - YYARP_HOSTNAME=iiticublap235
+        - YYARP_HOSTNAME=<your_host_name>
     volumes:
         - "/tmp/.X11-unix:/tmp/.X11-unix"
         - "/dev:/dev"
@@ -45,7 +45,7 @@ services:
                           yarpmanager"
 
     detectron2:
-        image: ghcr.io/hsp-iit/ycb-pretrained-cv-models
+        image: ghcr.io/hsp-iit/ycb-pretrained-cv-models:devel
         <<: *common
         deploy:
             <<: *deploy-restart-common
@@ -59,7 +59,7 @@ services:
                           python detectron2_yarp_module.py gpu_id 1"
 
     dope:
-        image: ghcr.io/hsp-iit/ycb-pretrained-cv-models
+        image: ghcr.io/hsp-iit/ycb-pretrained-cv-models:devel
         <<: *common
         deploy:
             <<: *deploy-restart-common
