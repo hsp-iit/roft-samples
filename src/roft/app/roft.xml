@@ -49,12 +49,6 @@
     </connection>
 
     <connection>
-        <from>/roft-samples-tracker/segmentation/rgb:o</from>
-        <to>/detection/image_inference:i</to>
-        <protocol>mjpeg</protocol>
-    </connection>
-
-    <connection>
         <from>/depthCamera/depthImage:o</from>
         <to>/roft-samples-tracker/camera/depth:i</to>
         <protocol>fast_tcp</protocol>
@@ -79,12 +73,6 @@
     </connection>
 
     <connection>
-        <from>/detection/mask:o</from>
-        <to>/roft-samples-tracker/segmentation/segmentation:i</to>
-        <protocol>fast_tcp</protocol>
-    </connection>
-
-    <connection>
         <from>/roft-samples-tracker/probe/segmentation:o</from>
         <to>/roft-samples-tracker/viewer/refined_segmentation:i</to>
         <protocol>unix_stream</protocol>
@@ -99,12 +87,6 @@
     <connection>
         <from>/roft-samples-tracker/probe/pose_source_render:o</from>
         <to>/roft-samples-tracker/viewer/pose_estimation:i</to>
-        <protocol>unix_stream</protocol>
-    </connection>
-
-    <connection>
-        <from>/roft-samples-tracker/probe/outlier_rejection:o</from>
-        <to>/roft-samples-tracker/viewer/outlier_rejection:i</to>
         <protocol>unix_stream</protocol>
     </connection>
 
