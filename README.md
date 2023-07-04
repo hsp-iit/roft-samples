@@ -16,6 +16,8 @@ The application needs:
 We provide (1) and (2) within this repository in the form of a docker container.
 A secondary container hosts (3) and (4) but it is not public yet, at the moment.
 
+### ℹ️ iCubGenova11 users
+**If you are a user of the `iCubGenova11` robot setup within CRIS@IIT, you might want to refer to the detailed instructions on how to run the robot demonstration. These are available [here](https://github.com/hsp-iit/roft-samples/blob/master/assets/iCubGenova11_demo.md).**
 
 ## Build the docker image for (1) and (2)
 
