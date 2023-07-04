@@ -22,12 +22,18 @@ docker swarm join --token <a_token> <manager_ip>:<manager_port>
 
 Simply copy-paste, or use ssh to ease the process, the command **on the worker node**. However, please substitute the `<manager_ip>` with its hostname.
 
-After that, we can also configure labels to workers devoted to run ML modules.
+After that, we must add labels to nodes devoted to run ROFT and ML modules.
 
-For each worker, on the `manager` please do:
+For each worker providing ROFT, please do on the `manager`:
 
 ```console
-docker node update --label-add ycb_cv_deployer=true <worker_hostname>
+docker node update --label-add roft_deployer=true <node_hostname>
+```
+
+For those providing ML modules, please do on the `manager`:
+
+```console
+docker node update --label-add ycb_cv_deployer=true <node_hostname>
 ```
 
 ### Configure GPUs on all machines (manager and workers)
@@ -75,8 +81,8 @@ docker stack deploy -c docker-compose.yml roft-samples-handover-stack
 After running the demo, stop all services and rm the stack:
 
 ```console
-docker service update --replicas 0 roft
-docker service update --replicas 0 detectron2
-docker service update --replicas 0 dope
+docker service update --replicas 0 roft-samples-handover-stack_roft
+docker service update --replicas 0 roft-samples-handover-stack_detectron2
+docker service update --replicas 0 roft-samples-handover-stack_dope
 docker stack rm roft-samples-handover-stack
 ```
