@@ -110,7 +110,7 @@ After that, an instance of `yarpmanager` will open automatically on a `roft-depl
 
 In the `yarpmanager` above please open the application `ROFT Handover with iCub (embedded)` and just `run all` + `connect all`. Some modules / ports might remain unavailable - those are used to add speech functionality to the appliation and are optional.
 
-To stop the stack simply do
+To stop the stack simply `stop all` the applications in the `yarpmanager`, wait for them to be closed and then do:
 ```
 docker stack rm roft-samples-handover-stack
 ```
