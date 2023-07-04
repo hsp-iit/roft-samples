@@ -171,7 +171,8 @@ RUN mkdir -p /home/user/.local/share/yarp/contexts && \
 #
 # realsense-holder-publisher
     mkdir /home/user/.local/share/yarp/contexts/realsense-holder-publisher && \
-    cp /home/user/roft-samples/assets/iCubGenova01/contexts/realsense-holder-publisher/* /home/user/.local/share/yarp/contexts/realsense-holder-publisher/
+    cp /home/user/roft-samples/assets/iCubGenova01/contexts/realsense-holder-publisher/* /home/user/.local/share/yarp/contexts/realsense-holder-publisher/ && \
+    cp /home/user/roft-samples/assets/iCubGenova11/contexts/realsense-holder-publisher/* /home/user/.local/share/yarp/contexts/realsense-holder-publisher/
 
 # Launch bash from /home/user
 WORKDIR /home/user
