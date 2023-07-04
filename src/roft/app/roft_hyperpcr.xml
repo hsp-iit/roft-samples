@@ -4,7 +4,7 @@
     <module>
         <name>roft-samples-tracker</name>
         <node>localhost</node>
-        <parameters>--OUTPUT_FORMAT::reference_frame root --POSE::feedback DepthSegmentation --OUTLIER_REJECTION::enable false --POSE_RENDERING::style bounding_box</parameters>
+        <parameters>--OUTPUT_FORMAT::reference_frame root --POSE::feedback DepthSegmentation --OUTLIER_REJECTION::enable false --POSE_RENDERING::style bounding_box --from config_d405.ini</parameters>
     </module>
 
     <module>

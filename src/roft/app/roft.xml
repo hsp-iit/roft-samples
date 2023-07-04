@@ -4,7 +4,7 @@
     <module>
         <name>roft-samples-tracker</name>
         <node>localhost</node>
-        <parameters>--OUTPUT_FORMAT::reference_frame root</parameters>
+        <parameters>--OUTPUT_FORMAT::reference_frame root --from config_d405.ini</parameters>
     </module>
 
     <module>
