@@ -15,7 +15,7 @@
     <module>
         <name>realsense-holder-publisher</name>
         <node>localhost</node>
-        <parameters>--from config_half_tilted.ini</parameters>
+        <parameters>--from config_half_tilted_v27_d405.ini</parameters>
     </module>
 
     <module>
