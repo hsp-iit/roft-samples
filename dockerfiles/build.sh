@@ -1,1 +1,1 @@
-docker build --rm -t roft-samples-img .
+docker build --rm -t roft-samples-img:devel .
