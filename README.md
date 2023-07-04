@@ -136,7 +136,25 @@ docker stack rm roft-samples-handover-stack
 
 The demo has been tested solely using the RGBD streamer provided within this repository, `roft-samples-rs`, that works with `RealSense` cameras. 
 
-Although all the software required to run it is provided in the `roft-samples-image` docker image, it cannot be run within the container as the `docker stack deploy` does not offer any mechanism to use the R
+Although all the software required to run it is provided in the `roft-samples-image` docker image, it cannot be run within the container as the `docker stack deploy` does not offer any mechanism to use `RealSense` cameras within the container being created. Indeed, it requires either the `--privileged` option to be available or the support to Linux `cgroups` to grant the container the access to the camera device. Although these options are both available when using `docker run` or `docker compose`, these are not available when using `docker stack deploy`.
+
+Hence, the streamer should be installed outside the container. If the `robotology-superbuild` is used, the streamer can be easily installed as follows - assuming that `librealsense` is installed in the system:
+
+```console
+git clone https://github.com/xenvre/robots-io
+cd robots-io && mkdir build && cd build
+cmake -DUSE_YARP=ON -DUSE_ICUB=ON ../
+make install
+git clone https://github.com/hsp-iit/roft-samples
+cd roft-samples && mkdir build && cd build
+cmake -DBUILD_REALSENSE=ON ../
+make install
+```
+The `roft-samples-rs` executable will then be available within the `bin` environmental path exposed by the `robotology-superbuild`. To start the camera streaming simply do:
+
+```console
+roft-samples-rs
+```
 
 ### How to change the intrinsic parameters
 
