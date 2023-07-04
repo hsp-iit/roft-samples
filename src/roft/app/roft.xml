@@ -20,25 +20,25 @@
 
     <module>
         <name>yarpview</name>
-        <parameters>--name /roft-samples-tracker/viewer/segmentation:i --compact --w 576 --h 432 --x 100 --y 100 </parameters>
+        <parameters>--name /roft-samples-tracker/viewer/segmentation:i --synch --compact --w 576 --h 432 --x 2632 --y 100</parameters>
         <node>localhost</node>
     </module>
 
     <module>
         <name>yarpview</name>
-        <parameters>--name /roft-samples-tracker/viewer/refined_segmentation:i --synch --compact --w 576 --h 432 --x 712 --y 100</parameters>
+        <parameters>--name /roft-samples-tracker/viewer/pose_estimation:i --compact --w 576 --h 432 --x 2632 --y 584</parameters>
         <node>localhost</node>
     </module>
 
     <module>
         <name>yarpview</name>
-        <parameters>--name /roft-samples-tracker/viewer/pose_estimation:i --compact --w 576 --h 432 --x 100 --y 584</parameters>
+        <parameters>--name /roft-samples-tracker/viewer/pose_render:i --synch --compact --w 576 --h 432 --x 3244 --y 584</parameters>
         <node>localhost</node>
     </module>
 
     <module>
         <name>yarpview</name>
-        <parameters>--name /roft-samples-tracker/viewer/pose_render:i --synch --compact --w 576 --h 432 --x 712 --y 584</parameters>
+        <parameters>--name /roft-samples-tracker/viewer/refined_segmentation:i --synch --compact --w 576 --h 432 --x 3244 --y 100</parameters>
         <node>localhost</node>
     </module>
 
