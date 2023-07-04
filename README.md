@@ -19,16 +19,24 @@ A secondary container hosts (3) and (4) but it is not public yet, at the moment.
 
 ## Build the docker image for (1) and (2)
 
+<details><summary>Click to expand.</summary>
+
 Build the docker image:
 ```console
 cd dockerfiles
-bash build.sh # This will create an image named roft-samples-image
+bash build.sh # This will create an image named roft-samples-image:devel
 ```
+</details>
 
 ## Build the docker image for (3) and (4)
+<details><summary>Click to expand.</summary>
+
 Not available at the moment.
+</details>
 
 ## Setup a cluster with two machines
+
+<details><summary>Click to expand.</summary>
 
 Here we provide instructions on how to setup a cluster of two machines `machine_1` and `machine_2` (of course other configurations are possible). 
 - `machine_1` needs:
@@ -41,7 +49,7 @@ Here we provide instructions on how to setup a cluster of two machines `machine_
    - a docker engine
 
 ### Swarm setup
-First we need to setup a `docker swarm` cluster with `machine_1` the leader and `machine_2` a worker:
+First we need to setup a `docker swarm` cluster with `machine_1` being the leader and `machine_2` a worker:
 
 On `machine_1`:
 ```console
@@ -95,23 +103,71 @@ Finally, restart docker by issuing `sudo systemctl restart docker.service`.
 
 Nodes can be inspected using `docker node inspect <node_name>` to verify that the GPUs are correctly exposed.
 
+</details>
+
 ## Deploy the stack
 
-We assume that a `yarpserver` is already running within the network on port `10000`. Please insert the IP address of the server in: https://github.com/hsp-iit/roft-samples/blob/fa4bb5ce925ba611dac09a3edb6be04031417760/dockercompose/docker-compose.yml#L10
+Assumptions:
+- a `yarpserver` running on port`10000`. Please insert the IP address of the server in: https://github.com/hsp-iit/roft-samples/blob/fa4bb5ce925ba611dac09a3edb6be04031417760/dockercompose/docker-compose.yml#L10
+- a stream of 640x480 RGB and depth images at 60 Hz is available within the ports `/depthCamera/rgbImage:o` and `/depthCamera/depthImage:o`.
 
-Then do the following:
+#### Start the stack
 
 ```console
 cd roft-samples/dockercompose
 docker stack deploy -c docker-compose.yml roft-samples-handover-stack
 ```
 
-After that, an instance of `yarpmanager` will open automatically on a `roft-deployer` while the segmentation and pose estimation modules will be running within a `ycb_cv_deployer` headlessly.
+An instance of `yarpmanager` will open automatically on a `roft-deployer` while the segmentation and pose estimation modules will be running within a `ycb_cv_deployer` headlessly. See [here](#setup-a-cluster-with-two-machines) for more details.
 
-In the `yarpmanager` above please open the application `ROFT Handover with iCub (embedded)` and just `run all` + `connect all`. Some modules / ports might remain unavailable - those are used to add speech functionality to the appliation and are optional.
+In the `yarpmanager` window open the application `ROFT Handover with iCub (embedded)` and just `run all` + `connect all`.
+> Some modules / ports might remain unavailable - those are used to add speech functionality to the application and are optional.
+
+#### Stop the stack
 
 To stop the stack simply `stop all` the applications in the `yarpmanager`, wait for them to be closed and then do:
 ```
 docker stack rm roft-samples-handover-stack
 ```
 
+## :warning: Notes on the input RGBD image stream
+
+<details><summary>Click to expand.</summary>
+
+The demo has been tested solely using the RGBD streamer provided within this repository, `roft-samples-rs`, that works with `RealSense` cameras. 
+
+Although all the software required to run it is provided in the `roft-samples-image` docker image, it cannot be run within the container as the `docker stack deploy` does not offer any mechanism to use the R
+
+### How to change the intrinsic parameters
+
+The default configuration of the modules assumes that a `RealSense D405 camera` is used. The intrinsic parameters of such camera can be modified in several ways.
+
+#### Persistent change
+Once the stack is running, `docker exec` a bash shell interactively within the container running inside the `roft-deployer`:
+
+```console
+docker exec -it <name_of_the_container> bash
+```
+
+Then modify the following entries:
+
+https://github.com/hsp-iit/roft-samples/blob/37c0c313433bcb0fbe198f7cdac064a773471626/src/roft/app/conf/config_d405.ini#L1-L9
+
+within the file `~/.local/share/yarp/contexts/roft/config_d405.ini` - that is installed at docker build time (check [here](https://github.com/hsp-iit/roft-samples/blob/caca62f9989235531fe77160ada7f07d21964c80/dockerfiles/Dockerfile#L162)).
+
+Then, commit the docker image:
+
+```console
+docker commit <name_of_the_container> roft-samples-image:devel
+```
+
+Finally, stop the stack and deploy it again to use the updated intrinsics.
+
+#### Temporary change
+
+If you only need to change the intrinsics temporarily, you can simply override them within the `Parameters` field of the `yarpmanager` for the module `roft` by appending:
+```console
+--CAMERA::fx <new_fx_value> --CAMERA::fy <new_fy_value> --CAMERA::cx <new_cx_value> --CAMERA::cy <new_cy_value>
+```
+
+</details>
