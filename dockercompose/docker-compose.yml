@@ -7,11 +7,13 @@ x-common:
         - NVIDIA_DRIVER_CAPABILITIES=all
         - YARP_COLORED_OUTPUT=1
         - YARP_NAMESPACE=/icub01
-        - YYARP_HOSTNAME=?
+        - YYARP_HOSTNAME=iiticublap235
     volumes:
         - "/tmp/.X11-unix:/tmp/.X11-unix"
         - "/dev:/dev"
     user: user
+    networks:
+        - host
 
 x-deploy-restart-common:
     &deploy-restart-common
@@ -24,64 +26,53 @@ x-ycb-cv-deployer:
         constraints:
             - node.labels.ycb_cv_deployer==true
 
-x-gpu-resource-0:
-    &gpu-resource-0
-    resources:
-        reservations:
-            generic_resources:
-                - discrete_resource_spec:
-                    kind: "NVIDIA-GPU"
-                    value: 0
-
-x-gpu-resource-1:
-    &gpu-resource-1
-    resources:
-        reservations:
-            generic_resources:
-                - discrete_resource_spec:
-                    kind: "NVIDIA-GPU"
-                    value: 1
 services:
     roft:
-        image: roft-samples:latest
-        container_name: roft-samples-cnt-stack
-        <<: &common
+        image: roft-samples-img:devel
+        <<: *common
         deploy:
             <<: *deploy-restart-common
-        command: bash -c "source ~/robotology-superbuild/build/install/share/robotology-superbuild/setup.sh &&
-                          yarp conf ${YYARP_HOSTNAME} 10000 &&
-                          yarp wait ${YARP_NAMESPACE} &&
-                          yarpmanager --application ~/.local/share/yarp/applications/roft-samples-handover-embedded.xml"
+            placement:
+                constraints:
+                    - node.labels.roft_deployer==true
+        command: bash -c "source /robotology-superbuild/build/install/share/robotology-superbuild/setup.sh;
+                          export YARP_DATA_DIRS=$${YARP_DATA_DIRS}:/home/user/roft-samples/install/share/ICUBcontrib;
+                          export PATH=$${PATH}:/home/user/roft-samples/install/bin;
+                          export YARP_RUNTIME_DIR=/home/user/.runtime;
+                          export ENV LUA_CPATH=';;;/robotology-superbuild/build/install/lib/lua/5.2/?.so';
+                          yarp conf $${YYARP_HOSTNAME} 10000;
+                          yarp wait $${YARP_NAMESPACE};
+                          yarpmanager"
 
     detectron2:
-        image: ycb-pretrained-cv-models:latest
-        container_name: ycb-pretrained-cv-models-detectron2-stack
+        image: ghcr.io/hsp-iit/ycb-pretrained-cv-models
         <<: *common
         deploy:
             <<: *deploy-restart-common
             <<: *ycb-cv-deployer
-            <<: *gpu-resource-1
-        command: bash -c "source ~/robotology-superbuild/build/install/share/robotology-superbuild/setup.sh &&
-                          yarp conf ${YYARP_HOSTNAME} 10000 &&
-                          yarp wait ${YARP_NAMESPACE} &&
+        command: bash -c "source /robotology-superbuild/build/install/share/robotology-superbuild/setup.sh;
+                          yarp conf $${YYARP_HOSTNAME} 10000;
+                          yarp wait $${YARP_NAMESPACE};
                           cd ycb-pretrained-cv-models &&
                           cd detectron2 &&
                           . env_detectron2/bin/activate &&
-                          python detectron2_yarp_module.py gpu_id 0"
+                          python detectron2_yarp_module.py gpu_id 1"
 
     dope:
-        image: ycb-pretrained-cv-models:latest
-        container_name: ycb-pretrained-cv-models-dope-stack
+        image: ghcr.io/hsp-iit/ycb-pretrained-cv-models
         <<: *common
         deploy:
             <<: *deploy-restart-common
             <<: *ycb-cv-deployer
-            <<: *gpu-resource-0
-        command: bash -c "source ~/robotology-superbuild/build/install/share/robotology-superbuild/setup.sh &&
-                          yarp conf ${YYARP_HOSTNAME} 10000 &&
-                          yarp wait ${YARP_NAMESPACE} &&
+        command: bash -c "source /robotology-superbuild/build/install/share/robotology-superbuild/setup.sh;
+                          yarp conf $${YYARP_HOSTNAME} 10000;
+                          yarp wait $${YARP_NAMESPACE};
                           cd ycb-pretrained-cv-models &&
                           cd dope &&
                           . env_dope/bin/activate &&
-                          yarp wait ${YARP_NAMESPACE} &&
                           python dope_yarp_module.py gpu_id 0"
+
+networks:
+    host:
+        external:
+            name: host
