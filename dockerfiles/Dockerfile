@@ -159,6 +159,7 @@ RUN mkdir -p /home/user/.local/share/yarp/contexts && \
     cp /home/user/roft-samples/install/share/ICUBcontrib/templates/applications/*.xml /home/user/.local/share/yarp/applications/ && \
     mkdir /home/user/.local/share/yarp/contexts/roft-samples-tracker && \
     cp /home/user/roft-samples/install/share/ICUBcontrib/contexts/roft-samples-tracker/config.ini /home/user/.local/share/yarp/contexts/roft-samples-tracker/config.ini && \
+    cp /home/user/roft-samples/install/share/ICUBcontrib/contexts/roft-samples-tracker/config_d405.ini /home/user/.local/share/yarp/contexts/roft-samples-tracker/config_d405.ini && \
 #
 # roft-samples-handover xml and config
     cp /home/user/roft-samples/install/share/ICUBcontrib/templates/applications/*.xml /home/user/.local/share/yarp/applications/ && \
