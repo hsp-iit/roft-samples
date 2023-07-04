@@ -7,7 +7,7 @@ x-common:
         - NVIDIA_DRIVER_CAPABILITIES=all
         - YARP_COLORED_OUTPUT=1
         - YARP_NAMESPACE=/icub01
-        - YYARP_HOSTNAME=<your_host_name>
+        - YYARP_SERVER_IP=<yarp_server_ip>
     volumes:
         - "/tmp/.X11-unix:/tmp/.X11-unix"
         - "/dev:/dev"
@@ -40,7 +40,7 @@ services:
                           export PATH=$${PATH}:/home/user/roft-samples/install/bin;
                           export YARP_RUNTIME_DIR=/home/user/.runtime;
                           export ENV LUA_CPATH=';;;/robotology-superbuild/build/install/lib/lua/5.2/?.so';
-                          yarp conf $${YYARP_HOSTNAME} 10000;
+                          yarp conf $${YYARP_SERVER_IP} 10000;
                           yarp wait $${YARP_NAMESPACE};
                           yarpmanager"
 
@@ -51,7 +51,7 @@ services:
             <<: *deploy-restart-common
             <<: *ycb-cv-deployer
         command: bash -c "source /robotology-superbuild/build/install/share/robotology-superbuild/setup.sh;
-                          yarp conf $${YYARP_HOSTNAME} 10000;
+                          yarp conf $${YYARP_SERVER_IP} 10000;
                           yarp wait $${YARP_NAMESPACE};
                           cd ycb-pretrained-cv-models &&
                           cd detectron2 &&
@@ -65,7 +65,7 @@ services:
             <<: *deploy-restart-common
             <<: *ycb-cv-deployer
         command: bash -c "source /robotology-superbuild/build/install/share/robotology-superbuild/setup.sh;
-                          yarp conf $${YYARP_HOSTNAME} 10000;
+                          yarp conf $${YYARP_SERVER_IP} 10000;
                           yarp wait $${YARP_NAMESPACE};
                           cd ycb-pretrained-cv-models &&
                           cd dope &&
