@@ -40,7 +40,7 @@ Not available at the moment.
 
 <details><summary>Click to expand.</summary>
 
-Here we provide instructions on how to setup a cluster of two machines `machine_1` and `machine_2` (of course other configurations are possible). 
+Here we provide instructions on how to **permanently** setup a cluster of two machines `machine_1` and `machine_2` (of course other configurations are possible) - meaning that after these commands `docker` on `machine_2` will not work properly if the `machine_1` is not reachable.
 - `machine_1` needs:
    - an NVIDIA optical flow-enabled GPU (most GeForce RTX >= 20x0 cards)
    - the `roft-samples-image` docker image available
