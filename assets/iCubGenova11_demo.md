@@ -1,5 +1,7 @@
 ## Detailed instructions on how to run the handover demo on iCubGenova11
 
+:warning: Differently from the generic documentation in the main `README.md` of this repository, these instructions will let you initialize and shutdown the docker swarm every time the demonstration is executed - helper scripts are provided. This is important to restore the status of the machines involved in the demonstration such that docker can run locally in non-swarm mode - as required normally.
+
 #### Objects
 - Go and pick YCB `006_mustard_bottle` and `004_sugar_box`
 
@@ -25,7 +27,7 @@
 - Turn on the laptop
 - Check that both the GPU are up and running by launching `nvidia-smi`
 
-#### Both laptopts
+#### Both laptops
 - Make sure docker is running, if not please `systemctl start docker.service`
 
 #### Start the robot w/ camera streaming
@@ -36,7 +38,7 @@
   - `Entities` section:
     - Open `iCubStartup (iCubGenova11)` and run, in order, (0), (1) and, after the robot has started succesfully, (2), (3) and (4)
     - Open `Realsense (ROFT)` and run all, connect all
-   
+
 #### Start the speech deployer (optional)
 - Open `VirtualBox` on `iiticublap235`
 - Run the only available appliance
@@ -45,6 +47,7 @@
 #### Deploy the stack
 ```console
 cd $ROBOT_CODE/icub-contrib-iit/roft-samples/dockercompose
+./set_swarm_up.sh
 docker stack deploy -c docker-compose.yml stack
 ```
 
@@ -62,9 +65,16 @@ where `<id>` is `o006` or `o004`.
 #### Via microphone
 Unmute the microphone and say `Let's play with mustard` or `Let's play with sugar` for the two objects respectively.
 
-#### Shutdown
-- Stop all in the `yarpmanager` and wait for everything to be red
-- Then do `docker stack rm stack`
+#### Shutdown the stack
+Stop all in the `yarpmanager` and wait for everything to be red. Then:
+
+```console
+cd $ROBOT_CODE/icub-contrib-iit/roft-samples/dockercompose
+docker stack rm stack
+./set_swarm_down.sh
+```
+
+#### Final shutdown
 - Stop all applications in `Realsense (ROFT)` and `iCubStartup (iCubGenova11)` in reversed order
 - Power off the head of the robot `ssh icub-head; sudo poweroff`
 - Turn off the two laptops, the microphone, the Sennheiser receiver, the external GPU and the external display
