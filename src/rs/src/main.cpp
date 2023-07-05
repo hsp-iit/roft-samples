@@ -22,6 +22,31 @@ using namespace RobotsIO::Utils;
 
 int main(int argc, char ** argv)
 {
+    /* Check if a camera is connected. */
+    rs2::context context;
+    if (context.query_devices().size() == 0)
+    {
+        std::cerr << "roft-samples-rs::main. Error: No device connected, please connect a RealSense device." << std::endl;
+
+        return EXIT_FAILURE;
+    }
+
+    /* Check if a D405 camera is connected. */
+    rs2::device_hub device_hub(context);
+    rs2::device device = device_hub.wait_for_device();
+    const std::string camera_name = std::string(device.get_info(RS2_CAMERA_INFO_NAME));
+    const bool is_d405 = (camera_name.find("D405") != std::string::npos);
+
+    /* Extract the depth scaling parameter. */
+    std::vector<rs2::sensor> sensors = device.query_sensors();
+    rs2::sensor* depth_sensor;
+    for (auto& sensor : sensors)
+    {
+        if (sensor.is<rs2::depth_sensor>())
+            depth_sensor = &sensor;
+    }
+    double depth_scaling = depth_sensor->get_option(RS2_OPTION_DEPTH_UNITS);
+
     /* Create pipeline. */
     rs2::pipeline pipe;
     rs2::config cfg;
@@ -60,8 +85,9 @@ int main(int argc, char ** argv)
         auto epoch_ns = now_ns.time_since_epoch();
         double absolute_sec = std::chrono::duration_cast<std::chrono::nanoseconds>(epoch_ns).count() / (1000.0 * 1000.0 * 1000.0);
 
-        /* Align frames. */
-        frameset = align_to_color.process(frameset);
+        /* Align frames (except for D405). */
+        if (!is_d405)
+            frameset = align_to_color.process(frameset);
 
         /* Extract separate frames and colorize. */
         auto depth = frameset.get_depth_frame();
@@ -74,7 +100,7 @@ int main(int argc, char ** argv)
         const int h = depth.as<rs2::video_frame>().get_height();
         cv::Mat cv_rgb(cv::Size(w, h), CV_8UC3, (void*) color.get_data(), cv::Mat::AUTO_STEP);
         cv::Mat cv_depth(cv::Size(w, h), CV_16U, (void*) depth.get_data(), cv::Mat::AUTO_STEP);
-        cv_depth.convertTo(cv_depth, CV_32FC1, 0.001);
+        cv_depth.convertTo(cv_depth, CV_32FC1, depth_scaling);
 
         output_rgb = cv_rgb.clone();
         cv::cvtColor(output_rgb, output_rgb, CV_RGB2BGR);
