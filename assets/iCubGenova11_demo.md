@@ -20,9 +20,10 @@
 - Turn on the laptop
 
 #### IITICUBLAP232
-- Connect external GPU
+- Connect external GPU and switch it on
 - Make sure the laptop is connected to the robot network using the proper cable
 - Turn on the laptop
+- Check that both the GPU are up and running by launching `nvidia-smi`
 
 #### Both laptopts
 - Make sure docker is running, if not please `systemctl start docker.service`
