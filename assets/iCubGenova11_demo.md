@@ -76,7 +76,9 @@ docker stack rm stack
 
 #### Final shutdown
 - Stop all applications in `Realsense (ROFT)` and `iCubStartup (iCubGenova11)` in reversed order
+- Stop the speech deployer running on VirtualBox and save the machine state
 - Power off the head of the robot `ssh icub-head; sudo poweroff`
+- Power off the robot
 - Turn off the two laptops, the microphone, the Sennheiser receiver, the external GPU and the external display
 - Reconnect back `iiticublap232` to the external network
 - Please, disconnect all the cables and leave the desk tidy and clean as it was before!
