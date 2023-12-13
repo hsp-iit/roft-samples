@@ -190,6 +190,7 @@ bool Module::configure(yarp::os::ResourceFinder& rf)
     const Bottle rf_parts = rf.findGroup("PARTS");
     bool enable_part_left = rf_parts.check("left", Value(false)).asBool();
     bool enable_part_right = rf_parts.check("right", Value(false)).asBool();
+    bool enable_fingers = rf_parts.check("fingers", Value(false)).asBool();
 
     const Bottle rf_steady_state_detector = rf.findGroup("STEADY_STATE_DETECTOR");
     obj_ss_time_thr_ = rf_steady_state_detector.check("time_threshold", Value(4.0)).asFloat64();
@@ -305,12 +306,14 @@ bool Module::configure(yarp::os::ResourceFinder& rf)
     if (enable_part_left)
     {
         joints_left_arm_ = std::make_shared<iCubMotorsPositions>(robot, "left", log_name_ + "/left_arm", /* use_arm = */ true, /* use_torso = */ false);
-        joints_left_hand_ = std::make_shared<iCubMotorsPositions>(robot, "left", log_name_ + "/left_hand", /* use_arm = */ true, /* use_torso = */ false);
+        if (enable_fingers)
+            joints_left_hand_ = std::make_shared<iCubMotorsPositions>(robot, "left", log_name_ + "/left_hand", /* use_arm = */ true, /* use_torso = */ false);
     }
     if (enable_part_right)
     {
         joints_right_arm_ = std::make_shared<iCubMotorsPositions>(robot, "right", log_name_ + "/right_arm", /* use_arm = */ true, /* use_torso = */ false);
-        joints_right_hand_ = std::make_shared<iCubMotorsPositions>(robot, "right", log_name_ + "/right_hand", /* use_arm = */ true, /* use_torso = */ false);
+        if (enable_fingers)
+            joints_right_hand_ = std::make_shared<iCubMotorsPositions>(robot, "right", log_name_ + "/right_hand", /* use_arm = */ true, /* use_torso = */ false);
     }
 
     /* Configure iCub Cartesian controllers. */
@@ -1129,9 +1132,9 @@ bool Module::execute_grasp(const Pose& pose, const MatrixXd& object_points, cons
             grasp_joints_hand_ = joints_right_hand_;
         }
 
-        if ((grasp_cart_ == nullptr) || (grasp_joints_hand_ == nullptr))
+        if ((grasp_cart_ == nullptr))
         {
-            yError() << log_name_ << "::execute_grasp. Unexpected state. Either the cartesian or joints driver pointers are nullptr";
+            yError() << log_name_ << "::execute_grasp. Unexpected state. The cartesian driver pointer is nullptr.";
             return false;
         }
 
@@ -1151,10 +1154,13 @@ bool Module::execute_grasp(const Pose& pose, const MatrixXd& object_points, cons
         grasp_cart_->controller().setTrajTime(approach_traj_time_);
 
         /* Hand pregrasp configuration .*/
-        if (grasp_type_ == "left")
-            grasp_joints_hand_->set_positions(pregrasp_hand_joints_left_, pregrasp_hand_joints_vels_, hand_considered_joints_);
-        else
-            grasp_joints_hand_->set_positions(pregrasp_hand_joints_right_, pregrasp_hand_joints_vels_, hand_considered_joints_);
+        if (grasp_joints_hand_)
+        {
+            if (grasp_type_ == "left")
+                grasp_joints_hand_->set_positions(pregrasp_hand_joints_left_, pregrasp_hand_joints_vels_, hand_considered_joints_);
+            else
+                grasp_joints_hand_->set_positions(pregrasp_hand_joints_right_, pregrasp_hand_joints_vels_, hand_considered_joints_);
+        }
 
         yInfo() << "[Grasp][Evaluate -> WaitHandPregrasp]";
 
@@ -1273,17 +1279,27 @@ bool Module::execute_grasp(const Pose& pose, const MatrixXd& object_points, cons
 
         VectorXd grasp_hand_joints = (grasp_type_ == "left") ? grasp_hand_joints_left_ : grasp_hand_joints_right_;
         VectorXd grasp_hand_joints_vels = (grasp_type_ == "left") ? grasp_hand_joints_vels_left_ : grasp_hand_joints_vels_right_;
-        grasp_joints_hand_->set_positions(grasp_hand_joints, grasp_hand_joints_vels, hand_considered_joints_);
+        if (grasp_joints_hand_)
+        {
+            grasp_joints_hand_->set_positions(grasp_hand_joints, grasp_hand_joints_vels, hand_considered_joints_);
 
-        yInfo() << "[Grasp][Grasp -> WaitGrasp]";
+            yInfo() << "[Grasp][Grasp -> WaitGrasp]";
 
-        grasp_state_ = GraspState::WaitGrasp;
-        start_counting(wait_grasp_);
+            grasp_state_ = GraspState::WaitGrasp;
+            start_counting(wait_grasp_);
+        }
+        else
+        {
+            yInfo() << "[Grasp][Grasp -> Lift]";
+
+            grasp_state_ = GraspState::Lift;
+        }
 
         return true;
     }
     else if (grasp_state_ == GraspState::WaitGrasp)
     {
+
         if (is_elapsed_from_start_counting())
         {
             if (grasp_joints_hand_->check_motion_done(hand_considered_joints_))
@@ -1370,14 +1386,23 @@ bool Module::execute_grasp(const Pose& pose, const MatrixXd& object_points, cons
     else if (grasp_state_ == GraspState::Release)
     {
         /* Object release .*/
-        if (grasp_type_ == "left")
-            grasp_joints_hand_->set_positions(postgrasp_hand_joints_left_, postgrasp_hand_joints_vels_, hand_considered_joints_);
-        else
-            grasp_joints_hand_->set_positions(postgrasp_hand_joints_right_, postgrasp_hand_joints_vels_, hand_considered_joints_);
-        yInfo() << "[Grasp][Release -> WaitRelease]";
+        if (grasp_joints_hand_)
+        {
+            if (grasp_type_ == "left")
+                grasp_joints_hand_->set_positions(postgrasp_hand_joints_left_, postgrasp_hand_joints_vels_, hand_considered_joints_);
+            else
+                grasp_joints_hand_->set_positions(postgrasp_hand_joints_right_, postgrasp_hand_joints_vels_, hand_considered_joints_);
+            yInfo() << "[Grasp][Release -> WaitRelease]";
 
-        grasp_state_ = GraspState::WaitRelease;
-        start_counting(wait_release_);
+            grasp_state_ = GraspState::WaitRelease;
+            start_counting(wait_release_);
+        }
+        else
+        {
+            yInfo() << "[Grasp][Release -> Cleanup]";
+
+            grasp_state_ = GraspState::Cleanup;
+        }
 
         return true;
     }

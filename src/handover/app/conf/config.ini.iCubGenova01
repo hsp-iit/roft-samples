@@ -81,8 +81,9 @@ right_grasp_vels              (100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 
 name                 006_mustard_bottle
 
 [PARTS]
-left                 false
+left                 true
 right                true
+fingers              true
 
 [STEADY_STATE_DETECTOR]
 time_threshold       2.0
