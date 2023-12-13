@@ -526,7 +526,7 @@ bool Module::updateModule()
 
             grasp_state_ = GraspState::Idle;
 
-            yInfo() << "[Grasp -> Idle]";
+            yInfo() << "[Grasp -> IdleNoGaze]";
 
             state_ = State::IdleNoGaze;
         }
@@ -539,7 +539,7 @@ bool Module::updateModule()
 
             yInfo() << "[Grasp -> Idle]";
 
-            state_ = State::IdleNoGaze;
+            state_ = State::Idle;
         }
 
         if(!execute_grasp(grasp_object_pose_, grasp_object_points_, pose, valid_pose))
